@@ -11,6 +11,10 @@ Features:
 Test Card: 4111 1111 1111 1111 | CVV: 111 | Expiry: Any future date
 """
 
+import sys
+from types import ModuleType
+sys.modules['pkg_resources'] = ModuleType('pkg_resources')
+
 import razorpay
 import json
 from decimal import Decimal
