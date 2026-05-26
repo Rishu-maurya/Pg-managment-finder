@@ -13,7 +13,12 @@ Test Card: 4111 1111 1111 1111 | CVV: 111 | Expiry: Any future date
 
 import sys
 from types import ModuleType
-sys.modules['pkg_resources'] = ModuleType('pkg_resources')
+
+
+mock_pkg = ModuleType('pkg_resources')
+class DummyException(Exception): pass
+mock_pkg.DistributionNotFound = DummyException
+sys.modules['pkg_resources'] = mock_pkg
 
 import razorpay
 import json
