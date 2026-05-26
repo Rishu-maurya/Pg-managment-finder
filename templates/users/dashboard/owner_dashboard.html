@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .owner-shell { max-width: 1240px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+  .owner-hero {
+    background: linear-gradient(135deg, #102038 0%, #1a4f7a 60%, #e99f4c 130%);
+    color: white;
+    border-radius: 28px;
+    padding: 1.8rem;
+    box-shadow: 0 20px 54px rgba(16, 32, 56, 0.28);
+  }
+  .hero-top { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .hero-top h1 { margin: 0 0 .35rem; font-size: clamp(2rem, 4vw, 3rem); }
+  .hero-top p { margin: 0; color: rgba(255,255,255,0.86); max-width: 42rem; }
+  .hero-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .hero-actions a {
+    text-decoration: none; padding: .85rem 1rem; border-radius: 14px; font-weight: 700;
+  }
+  .hero-actions .primary { background: white; color: #102038; }
+  .hero-actions .secondary { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.16); }
+  .metrics { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .9rem; margin-top: 1.25rem; }
+  .metric {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 1rem;
+  }
+  .metric strong { display: block; font-size: 1.55rem; margin-bottom: .2rem; }
+  .dashboard-grid { display: grid; grid-template-columns: 1.25fr .95fr; gap: 1.2rem; margin-top: 1.2rem; }
+  .panel { background: white; border-radius: 24px; box-shadow: 0 16px 42px rgba(30,31,61,0.08); padding: 1.2rem; }
+  .panel h2 { margin: 0 0 1rem; color: #13243d; }
+  .listing-grid { display: grid; gap: .9rem; }
+  .listing-card {
+    display: grid; grid-template-columns: 120px 1fr; gap: 1rem; border: 1px solid #e7edf5; border-radius: 18px; overflow: hidden;
+    background: #fbfdff;
+  }
+  .listing-card img { width: 100%; height: 100%; min-height: 130px; object-fit: cover; }
+  .listing-body { padding: .95rem .95rem .95rem 0; }
+  .listing-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .listing-head h3 { margin: 0; color: #13243d; }
+  .pills { display: flex; flex-wrap: wrap; gap: .45rem; margin: .6rem 0; }
+  .pill {
+    border-radius: 999px; padding: .34rem .75rem; font-size: .82rem; background: #eef4fb; color: #274260;
+  }
+  .pill.yes { background: #e4f7e9; color: #1d7d37; }
+  .pill.no { background: #fde8e8; color: #b42318; }
+  .listing-links { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
+  .listing-links a {
+    text-decoration: none; padding: .7rem .9rem; border-radius: 12px; font-weight: 700; font-size: .92rem;
+  }
+  .listing-links .map-link { background: #102038; color: white; }
+  .listing-links .details-link { background: #eef4fb; color: #13243d; }
+  .listing-links .edit-link { background: #f8f9fa; color: #0f172a; border: 1px solid #cbd5e1; }
+  .listing-links .delete-link { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  .map-embed {
+    width: 100%; height: 360px; border: 0; border-radius: 20px; background: #eef3f8;
+  }
+  .custom-map-pin-outer {
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 8px 18px rgba(239, 68, 68, 0.25);
+    position: relative;
+  }
+  .custom-map-pin-outer::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #b91c1c;
+    border-radius: 50%;
+    border: 3px solid #fff;
+  }
+  .custom-map-pin-inner {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .subtle { color: #63758a; }
+  .mini-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; margin: 1rem 0; }
+  .mini-card { background: #f8fbff; border: 1px solid #e7eef6; border-radius: 16px; padding: .95rem; }
+  .mini-card small { display: block; color: #68788d; margin-bottom: .25rem; }
+  .activity-list { display: grid; gap: .8rem; }
+  .activity-item { border: 1px solid #e7edf5; border-radius: 16px; padding: .9rem; }
+  .activity-row { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; }
+  .empty-note { padding: 1rem; border-radius: 16px; background: #f8fbff; color: #62758c; }
+  .map-note { margin-top: .75rem; font-size: .92rem; color: #66788d; }
+  @media (max-width: 1100px) {
+    .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .dashboard-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
+    .hero-top { flex-direction: column; }
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .listing-card { grid-template-columns: 1fr; }
+    .listing-body { padding: 0 1rem 1rem; }
+    .mini-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<section class="owner-shell">
+  <div class="owner-hero">
+    <div class="hero-top">
+      <div>
+        <h1>Owner Dashboard</h1>
+        <p>Track listing performance, booking reviews, visit requests, and property location from one place.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="primary" href="{% url 'pg_register' %}">Add new listing</a>
+        <a class="secondary" href="{% url 'owner_booking_reviews' %}">Open booking reviews</a>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><strong>{{ owner_metrics.total_listings }}</strong><span>Total listings</span></div>
+      <div class="metric"><strong>{{ owner_metrics.available_listings }}</strong><span>Available listings</span></div>
+      <div class="metric"><strong>{{ owner_metrics.pending_booking_reviews }}</strong><span>Pending payment reviews</span></div>
+      <div class="metric"><strong>{{ owner_metrics.confirmed_bookings }}</strong><span>Confirmed bookings</span></div>
+      <div class="metric"><strong>{{ owner_metrics.visit_requests }}</strong><span>Active visit requests</span></div>
+      <div class="metric"><strong>{{ owner_metrics.unread_contact_messages }}</strong><span>Unread contact messages</span></div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="panel">
+      <h2>Your Listings</h2>
+      <div class="listing-grid">
+        {% for pg in owner_listings %}
+          <article class="listing-card">
+            {% with pg.images.first as lead_image %}
+              {% if lead_image %}
+                <img src="{{ lead_image.pg_image.url }}" alt="{{ pg.title }}">
+              {% else %}
+                <img src="{% static 'images/user.png' %}" alt="{{ pg.title }}">
+              {% endif %}
+            {% endwith %}
+            <div class="listing-body">
+              <div class="listing-head">
+                <div>
+                  <h3>{{ pg.title }}</h3>
+                  <div class="subtle">{{ pg.address }}, {{ pg.city }}, {{ pg.state }}</div>
+                </div>
+                <div><strong>₹{{ pg.price_per_month }}/month</strong></div>
+              </div>
+
+              <div class="pills">
+                <span class="pill {% if pg.is_available %}yes{% else %}no{% endif %}">
+                  {% if pg.is_available %}Available{% else %}Unavailable{% endif %}
+                </span>
+                <span class="pill">{{ pg.get_sharing_type_display }}</span>
+                {% if pg.type_of_pg %}<span class="pill">{{ pg.get_type_of_pg_display }}</span>{% endif %}
+                <span class="pill">{{ pg.bookings.count }} bookings</span>
+                <span class="pill">{{ pg.visit_requests.count }} visits</span>
+              </div>
+
+              <div class="listing-links">
+                <a class="map-link" href="{% url 'owner_dashboard' %}?pg={{ pg.slug }}">Show on map</a>
+                <a class="details-link" href="{% url 'pg_detail' pg.slug %}">Open listing</a>
+                <a class="edit-link" href="{% url 'pg_edit' pg.slug %}">Edit</a>
+                <a class="delete-link" href="{% url 'pg_delete' pg.slug %}">Delete</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div>
+      <section class="panel">
+        <h2>Property Map</h2>
+        <h3 style="margin:.2rem 0 .35rem; color:#13243d;">{{ selected_pg.title }}</h3>
+        <p class="subtle">{{ selected_pg.address }}, {{ selected_pg.city }}, {{ selected_pg.state }} {{ selected_pg.pin_code }}</p>
+        <iframe src="{{ google_maps_url }}" class="map-embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div style="display:none;">{{ fallback_google_maps_url }}</div>
+        <p class="map-note">
+          <small>Powered by Google Maps{% if not maps_key_configured %} fallback embed{% endif %}</small>
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Selected Listing Snapshot</h2>
+        <div class="mini-grid">
+          <div class="mini-card"><small>Available from</small><strong>{{ selected_pg.available_from|date:"d M Y" }}</strong></div>
+          <div class="mini-card"><small>Security deposit</small><strong>₹{{ selected_pg.security_deposit }}</strong></div>
+          <div class="mini-card"><small>Furnishing</small><strong>{{ selected_pg.get_furnishing_status_display }}</strong></div>
+          <div class="mini-card"><small>Preferred tenants</small><strong>{{ selected_pg.preferred_tenants|default:"Open to all" }}</strong></div>
+        </div>
+        <p class="subtle">{{ selected_pg.description|truncatechars:180 }}</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="panel">
+      <h2>Recent Booking Activity</h2>
+      {% if recent_owner_bookings %}
+        <div class="activity-list">
+          {% for booking in recent_owner_bookings %}
+            <article class="activity-item">
+              <div class="activity-row">
+                <strong>{{ booking.pg.title }}</strong>
+                <span>{{ booking.get_status_display }}</span>
+              </div>
+              <div class="subtle">{{ booking.tenant.email }}</div>
+              <div class="subtle">Check-in {{ booking.check_in_date|date:"d M Y" }} · ₹{{ booking.amount }}</div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-note">No booking activity yet.</div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>Recent Visit Requests</h2>
+      {% if recent_visit_requests %}
+        <div class="activity-list">
+          {% for visit in recent_visit_requests %}
+            <article class="activity-item">
+              <div class="activity-row">
+                <strong>{{ visit.pg.title }}</strong>
+                <span>{{ visit.get_status_display }}</span>
+              </div>
+              <div class="subtle">{{ visit.user.email }}</div>
+              <div class="subtle">Preferred {{ visit.preferred_date|date:"d M Y" }}</div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-note">No visit requests yet.</div>
+      {% endif %}
+    </section>
+  </div>
+</section>
+
+{% endblock %}

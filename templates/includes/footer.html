@@ -1,0 +1,10 @@
+  {% load static %}
+  <footer class="footer">
+    <div class="container small">
+      &copy;<span id="year"></span> PG Finder • Built with the Beloved Devlopers.
+    </div>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </footer>

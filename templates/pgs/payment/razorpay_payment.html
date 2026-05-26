@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Payment - PG Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">>
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">💳 Complete Your Booking Payment</h4>
+                </div>
+                <div class="card-body">
+
+                    <!-- Booking Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Booking Details</h6>
+                            <p><strong>PG Name:</strong> {{ booking.pg.title }}</p>
+                            <p><strong>Check-in Date:</strong> {{ booking.check_in_date|date:"d M Y" }}</p>
+                            <p><strong>Tenant:</strong> {{ booking.tenant.first_name }} {{ booking.tenant.last_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Payment Amount</h6>
+                            <div class="alert alert-info mb-3">
+                                <h3 class="text-primary">₹{{ booking.amount|floatformat:2 }}</h3>
+                                <small>This is the payment amount for your booking</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Instructions -->
+                    <div class="alert alert-warning" role="alert">
+                        <strong>ℹ️ Info:</strong> You will be redirected to Razorpay secure payment gateway.
+                        We support all major payment methods including:
+                        <ul class="mb-0 mt-2">
+                            <li>💳 Credit/Debit Cards</li>
+                            <li>📱 UPI (Google Pay, PhonePe, BHIM)</li>
+                            <li>🏦 Net Banking</li>
+                            <li>💰 Wallets</li>
+                        </ul>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form id="razorpay-form" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <button type="button" id="pay-button" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-lock"></i> Proceed to Payment
+                            </button>
+                        </div>
+                        <p class="text-center text-muted small">
+                            <i class="fas fa-lock-alt"></i> Your payment is secure and encrypted
+                        </p>
+                    </form>
+
+                    <!-- Cancel Booking Option -->
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="text-center mb-3">
+                            <a href="{% url 'booking_confirmation' booking.id %}" class="btn btn-outline-danger">
+                                Cancel Booking
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust Indicators -->
+            <div class="row mt-4">
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                    <p><small><strong>Secure</strong><br>SSL Encrypted</small></p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-lock fa-2x text-success mb-2"></i>
+                    <p><small><strong>PCI Certified</strong><br>Payment Gateway</small></p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <p><small><strong>Instant</strong><br>Confirmation</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById('pay-button').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": {{ amount }},
+        "currency": "INR",
+        "name": "PG Finder",
+        "description": "Booking Payment for {{ booking.pg.title }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "image": "{% static 'images/logo.png' %}",
+        "prefill": {
+            "name": "{{ user_name }}",
+            "email": "{{ user_email }}",
+            "contact": "{{ user_phone }}"
+        },
+        "notes": {
+            "booking_id": "{{ booking.id }}",
+            "pg_id": "{{ booking.pg.id }}"
+        },
+        "handler": function(response) {
+            handlePaymentSuccess(response);
+        },
+        "modal": {
+            "ondismiss": function() {
+                alert("Payment cancelled by user");
+            }
+        },
+        "theme": {
+            "color": "#007bff"
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+});
+
+function handlePaymentSuccess(response) {
+    // Show loading state
+    const payButton = document.getElementById('pay-button');
+    payButton.disabled = true;
+    payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Payment...';
+
+    // Verify payment on backend
+    fetch("{% url 'verify_payment' booking.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Redirect to booking confirmation
+            window.location.href = "{% url 'booking_confirmation' booking.id %}?payment=success";
+        } else {
+            alert('Payment verification failed: ' + data.message);
+            payButton.disabled = false;
+            payButton.innerHTML = '<i class="fas fa-lock"></i> Proceed to Payment';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during verification');
+        payButton.disabled = false;
+        payButton.innerHTML = '<i class="fas fa-lock"></i> Proceed to Payment';
+    });
+}
+
+// Handle payment page load errors
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error')) {
+        alert('Payment Error: ' + urlParams.get('error'));
+    }
+});
+</script>
+
+<style>
+    .card {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0;
+        padding: 1.5rem;
+    }
+
+    .btn-primary {
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .trust-badge {
+        text-align: center;
+        padding: 15px;
+    }
+
+    .trust-badge i {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}

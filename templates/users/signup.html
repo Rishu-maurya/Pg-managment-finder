@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+  {% block title %}PG Finder Signup{% endblock %}
+  {% block newlink %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+  {% endblock %}
+
+  {% block content %}
+
+    <div class="d-flex align-items-center" style="height:82vh";>
+      <div class="container h-100 d-flex align-items-center">
+    <div class="row w-100">
+      <!-- Left Side Text -->
+      <div class="col-md-6 d-flex flex-column justify-content-center  p-4 rounded-3">
+        <h1>Welcome to PG Finder</h1>
+        <p>Find the perfect paying guest accommodation easily. Whether you are a client looking for a place to stay or an owner wanting to list your property, we have you covered. Start your journey with us today!</p>
+      </div>
+
+        <!-- Right Side Signup Card -->
+        <div class="col-md-6 d-flex justify-content-center align-items-center">
+          <div class="bg-white bg-opacity-80 p-4 rounded-4 shadow-lg text-center" style="width: 100%; max-width: 400px;">
+            <h3 class="mb-4 text-dark">PG Finder SignUp</h3>
+           
+            <a href="{% url 'client_register' %}" class="btn btn-primary m-2">Client Signup</a>
+           <a href="{% url 'owner_register' %}" class="btn btn-primary m-2 ">Owner Signup</a>
+             <div class="mt-2 text-muted ">
+          Already have an account? <a href="{% url 'user_login' %}" class="text-primary">Login </a>
+          </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% endblock %}
+  

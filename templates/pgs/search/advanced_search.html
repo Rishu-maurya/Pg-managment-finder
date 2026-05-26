@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Advanced Search - PG Finder{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🔍 Search & Filter</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <!-- Search Query -->
+                        <div class="mb-3">
+                            <label class="form-label">Search Query</label>
+                            {{ form.search_query }}
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range (₹/month)</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    {{ form.min_price }}
+                                </div>
+                                <div class="col-6">
+                                    {{ form.max_price }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    {{ form.city }}
+                                </div>
+                                <div class="col-6">
+                                    {{ form.state }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sharing Type -->
+                        <div class="mb-3">
+                            <label class="form-label d-block">💤 Sharing Type</label>
+                            <div class="form-check">
+                                {{ form.sharing_type }}
+                            </div>
+                        </div>
+
+                        <!-- Type of PG -->
+                        <div class="mb-3">
+                            <label class="form-label d-block">🏠 Type of PG</label>
+                            <div class="form-check">
+                                {{ form.type_of_pg }}
+                            </div>
+                        </div>
+
+                        <!-- Furnishing -->
+                        <div class="mb-3">
+                            <label class="form-label d-block">🛋️ Furnishing</label>
+                            <div class="form-check">
+                                {{ form.furnishing_status }}
+                            </div>
+                        </div>
+
+                        <!-- Amenities -->
+                        <div class="mb-3">
+                            <label class="form-label d-block">✨ Amenities</label>
+                            <div class="form-check">
+                                {{ form.food_available }}
+                            </div>
+                            <div class="form-check">
+                                {{ form.parking_available }}
+                            </div>
+                            <div class="form-check">
+                                {{ form.wifi_available }}
+                            </div>
+                        </div>
+
+                        <!-- Availability -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_available }}
+                            </div>
+                        </div>
+
+                        <!-- Sorting -->
+                        <div class="mb-3">
+                            <label class="form-label">Sort By</label>
+                            {{ form.sort_by }}
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                🔎 Apply Filters
+                            </button>
+                            <a href="{% url 'advanced_search' %}" class="btn btn-outline-secondary">
+                                ↻ Clear Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Found {{ total_count }} PGs</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- View Options & Results Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            {{ total_count }} PGs Found
+                            {% if form.cleaned_data.search_query %}
+                                for "{{ form.cleaned_data.search_query }}"
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div>
+                        <div class="btn-group" role="group">
+                            <a href="?view_type=list" class="btn btn-sm {% if view_type == 'list' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                ☰ List
+                            </a>
+                            <a href="?view_type=grid" class="btn btn-sm {% if view_type == 'grid' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                ▦ Grid
+                            </a>
+                            <a href="{% url 'map_view' %}" class="btn btn-sm btn-outline-primary">
+                                🗺️ Map
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listings Display -->
+            {% if listings %}
+                {% if view_type == 'grid' %}
+                    <!-- Grid View -->
+                    <div class="row g-3">
+                        {% for listing in listings %}
+                            <div class="col-md-6 col-lg-4">
+                                {{ listing_card|default:'' }}
+                                <div class="card h-100 shadow-sm hover-shadow">
+                                    <div class="position-relative">
+                                        {% if listing.images.first %}
+                                            <img src="{{ listing.images.first.pg_image.url }}" class="card-img-top" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <img src="{% static 'images/placeholder.png' %}" class="card-img-top" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="position-absolute top-0 end-0 m-2">
+                                            <span class="badge bg-primary">₹{{ listing.price_per_month }}/mo</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ listing.title|truncatewords:5 }}</h6>
+                                        <p class="card-text text-muted small">
+                                            📍 {{ listing.city }}, {{ listing.state }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                {% if listing.average_rating %}
+                                                    <span class="badge bg-warning">⭐ {{ listing.average_rating }}/5</span>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted">{{ listing.sharing_type }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-white">
+                                        <a href="{% url 'pg_detail' listing.slug %}" class="btn btn-sm btn-primary w-100">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- List View -->
+                    <div class="space-y-3">
+                        {% for listing in listings %}
+                            <div class="card shadow-sm hover-shadow">
+                                <div class="row g-0">
+                                    <div class="col-md-3">
+                                        {% if listing.images.first %}
+                                            <img src="{{ listing.images.first.pg_image.url }}" class="img-fluid rounded-start" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <img src="{% static 'images/placeholder.png' %}" class="img-fluid rounded-start" alt="{{ listing.title }}" style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0">{{ listing.title }}</h5>
+                                                <h4 class="text-primary">₹{{ listing.price_per_month }}/mo</h4>
+                                            </div>
+                                            <p class="card-text text-muted mb-2">
+                                                📍 {{ listing.address }}, {{ listing.city }}, {{ listing.state }} {{ listing.pin_code }}
+                                            </p>
+                                            <p class="card-text">{{ listing.description|truncatewords:20 }}</p>
+                                            <div class="d-flex gap-2 flex-wrap mb-3">
+                                                <span class="badge bg-light text-dark">{{ listing.sharing_type }}</span>
+                                                <span class="badge bg-light text-dark">{{ listing.type_of_pg }}</span>
+                                                {% if listing.wifi_available %}<span class="badge bg-info">📡 WiFi</span>{% endif %}
+                                                {% if listing.parking_available %}<span class="badge bg-info">🚗 Parking</span>{% endif %}
+                                                {% if listing.food_available %}<span class="badge bg-info">🍽️ Food</span>{% endif %}
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                {% if listing.average_rating %}
+                                                    <div>
+                                                        <span class="badge bg-warning">⭐ {{ listing.average_rating }}/5 ({{ listing.rating_count }} reviews)</span>
+                                                    </div>
+                                                {% endif %}
+                                                <a href="{% url 'pg_detail' listing.slug %}" class="btn btn-sm btn-primary">
+                                                    View Details →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                    <nav class="mt-4" aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if current_page > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if form.cleaned_data %}&{{ request.GET.urlencode }}{% endif %}">First</a>
+                                </li>
+                            {% endif %}
+                            {% for page_num in total_pages|make_list %}
+                                {% if page_num == current_page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_num }}{% if form.cleaned_data %}&{{ request.GET.urlencode }}{% endif %}">{{ page_num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <h5>No PGs Found</h5>
+                    <p>Try adjusting your filters to find more options.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px);
+    }
+    .sticky-top {
+        z-index: 100;
+    }
+</style>
+{% endblock %}

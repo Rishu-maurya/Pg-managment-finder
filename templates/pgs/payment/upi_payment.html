@@ -1,0 +1,830 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment - {{ booking.pg.title }} | PG Finder{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #FF6B6B;
+        --primary-light: #FFE5E5;
+        --success: #00B885;
+        --warning: #FFA500;
+        --secondary: #6C63FF;
+        --light: #F8F9FA;
+        --dark: #2D3436;
+        --border: #E0E0E0;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Payment page background wrapper */
+    .payment-page-wrapper {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        min-height: 100vh;
+        padding: 40px 20px 80px 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .payment-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .payment-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+        animation: slideDown 0.6s ease;
+    }
+
+    .payment-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .payment-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .main-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Booking Info Section */
+    .booking-info {
+        background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+        padding: 30px;
+        border-bottom: 2px solid var(--border);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .booking-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .booking-info-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-light);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .booking-info-content h4 {
+        color: var(--dark);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        opacity: 0.7;
+    }
+
+    .booking-info-content p {
+        color: var(--dark);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Amount Display */
+    .amount-display {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .amount-display .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .amount-display .amount {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    /* Payment Methods Section */
+    .payment-methods {
+        padding: 40px 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    .methods-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .method-card {
+        background: var(--light);
+        border: 2px solid var(--border);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: default;
+    }
+
+    .method-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1);
+        transform: translateY(-5px);
+    }
+
+    .method-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .method-card h3 {
+        color: var(--dark);
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .method-card p {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+    }
+
+    .qr-image {
+        width: 100%;
+        max-width: 200px;
+        display: block;
+        margin: 0 auto 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 10px;
+        border: 2px solid var(--border);
+    }
+
+    .upi-id-box {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .upi-id-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        background: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: text;
+    }
+
+    .copy-btn {
+        padding: 12px 20px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+        background: #FF5555;
+        transform: scale(1.05);
+    }
+
+    .copy-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Steps Section */
+    .steps-section {
+        background: var(--light);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+
+    .steps-list {
+        list-style: none;
+        counter-reset: step-counter;
+    }
+
+    .steps-list li {
+        counter-increment: step-counter;
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        align-items: flex-start;
+    }
+
+    .steps-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .step-content h4 {
+        color: var(--dark);
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .step-content p {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    /* Verification Form */
+    .verification-section {
+        background: linear-gradient(135deg, var(--primary-light) 0%, rgba(255, 107, 107, 0.05) 100%);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 2px solid var(--primary-light);
+    }
+
+    .verification-section h3 {
+        color: var(--dark);
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .verification-section h3::before {
+        content: '✓';
+        width: 30px;
+        height: 30px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--dark);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+    }
+
+    .form-group label .required {
+        color: var(--primary);
+    }
+
+    .form-group small {
+        display: block;
+        color: #666;
+        margin-top: 8px;
+        font-size: 0.85rem;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .submit-btn.loading {
+        position: relative;
+    }
+
+    /* Status Message */
+    .status-message {
+        display: none;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        animation: slideUp 0.3s ease;
+    }
+
+    .status-message.success {
+        background: #D4EDDA;
+        color: #155724;
+        border: 2px solid #C3E6CB;
+    }
+
+    .status-message.error {
+        background: #F8D7DA;
+        color: #721C24;
+        border: 2px solid #F5C6CB;
+    }
+
+    /* Cancel Button */
+    .cancel-section {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 2px solid var(--border);
+    }
+
+    .cancel-btn {
+        padding: 12px 30px;
+        background: transparent;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .cancel-btn:hover {
+        background: var(--primary-light);
+        transform: scale(1.05);
+    }
+
+    /* Trust Indicators */
+    .trust-indicators {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 40px;
+    }
+
+    .indicator {
+        text-align: center;
+        padding: 20px;
+        background: var(--light);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .indicator:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .indicator-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .indicator h4 {
+        color: var(--dark);
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .indicator p {
+        color: #666;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .payment-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .booking-info {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .methods-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .trust-indicators {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .step-content h4 {
+            font-size: 0.95rem;
+        }
+
+        .amount-display .amount {
+            font-size: 2rem;
+        }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="payment-page-wrapper">
+<div class="payment-container">
+    <!-- Header -->
+    <div class="payment-header">
+        <h1>💳 Complete Your Payment</h1>
+        <p>Transfer ₹{{ amount|floatformat:0 }} to book {{ booking.pg.title }}</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="main-card">
+        <!-- Booking Info -->
+        <div class="booking-info">
+            <div class="booking-info-item">
+                <div class="booking-info-icon">🏠</div>
+                <div class="booking-info-content">
+                    <h4>Property</h4>
+                    <p>{{ booking.pg.title }}</p>
+                </div>
+            </div>
+
+            <div class="booking-info-item">
+                <div class="booking-info-icon">📅</div>
+                <div class="booking-info-content">
+                    <h4>Check-in Date</h4>
+                    <p>{{ booking.check_in_date|date:"d M, Y" }}</p>
+                </div>
+            </div>
+
+            <div class="booking-info-item">
+                <div class="booking-info-icon">👤</div>
+                <div class="booking-info-content">
+                    <h4>Tenant</h4>
+                    <p>{{ booking.tenant.first_name }} {{ booking.tenant.last_name }}</p>
+                </div>
+            </div>
+
+            <div class="booking-info-item">
+                <div class="booking-info-icon">⏱️</div>
+                <div class="booking-info-content">
+                    <h4>Booked On</h4>
+                    <p>{{ booking.booking_date|date:"d M, Y" }}</p>
+                </div>
+            </div>
+
+            <div class="amount-display">
+                <div class="label">Amount to Pay</div>
+                <div class="amount">₹{{ amount|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+            <h2 class="section-title">Choose Your Payment Method</h2>
+
+            <div class="methods-grid">
+                <!-- QR Code -->
+                <div class="method-card">
+                    <div class="method-icon">📱</div>
+                    <h3>Scan QR Code</h3>
+                    <p>Use any UPI app to scan</p>
+                    {% if qr_code %}
+                        <img src="{{ qr_code }}" alt="UPI QR Code" class="qr-image">
+                    {% else %}
+                        <div style="color: #e74c3c; padding: 20px; background: #fadbd8; border-radius: 10px;">
+                            ⚠️ QR code generation failed
+                        </div>
+                    {% endif %}
+                    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 10px;">Works with Google Pay, PhonePe, BHIM, etc.</p>
+                </div>
+
+                <!-- Manual Transfer -->
+                <div class="method-card">
+                    <div class="method-icon">🔗</div>
+                    <h3>Manual Transfer</h3>
+                    <p>Copy UPI ID & transfer</p>
+                    <div class="upi-id-box">
+                        <input type="text" class="upi-id-input" id="upi-id" value="{{ upi_id }}" readonly>
+                        <button class="copy-btn" onclick="copyToClipboard('upi-id')">
+                            <span id="copy-icon">📋</span>
+                            <span id="copy-text">Copy</span>
+                        </button>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #7f8c8d; margin-top: 10px;">Paste in your bank/UPI app</p>
+                </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="steps-section">
+                <h2 class="section-title">Payment Steps</h2>
+                <ol class="steps-list">
+                    <li>
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Scan or Copy</h4>
+                            <p>Use the QR code or copy the UPI ID from above</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Open Your Bank App</h4>
+                            <p>Launch Google Pay, PhonePe, BHIM, or your bank's UPI app</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Complete Payment</h4>
+                            <p>Enter amount (₹{{ amount|floatformat:0 }}) and confirm with your PIN</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Get Transaction ID</h4>
+                            <p>You'll receive a transaction/reference ID via SMS or in app</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>Enter Below & Submit</h4>
+                            <p>Paste the transaction ID below to complete verification</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- Verification Form -->
+            <div class="verification-section">
+                <h3>Verify Your Payment</h3>
+
+                <form id="payment-form" method="POST" action="{% url 'verify_payment' booking.id %}">
+                    {% csrf_token %}
+
+                    <div id="status-message" class="status-message"></div>
+
+                    <div class="form-group">
+                        <label for="transaction-id">
+                            Transaction ID <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="transaction-id"
+                            name="transaction_id"
+                            placeholder="E.g., UPI transaction ID or reference number"
+                            required
+                            autocomplete="off"
+                        >
+                        <small>📌 You'll find this in your bank app or in the SMS you receive after payment</small>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submit-btn">
+                        <span>✓</span>
+                        <span>Verify Payment & Proceed</span>
+                    </button>
+                </form>
+
+                <div class="cancel-section">
+                    <a href="{% url 'cancel_payment' booking.id %}"
+                       class="cancel-btn"
+                       onclick="return confirm('Are you sure you want to cancel this booking?');">
+                        Cancel Booking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trust Indicators -->
+    <div class="trust-indicators">
+        <div class="indicator">
+            <div class="indicator-icon">🔒</div>
+            <h4>100% Secure</h4>
+            <p>Bank-Grade Encryption</p>
+        </div>
+        <div class="indicator">
+            <div class="indicator-icon">✓</div>
+            <h4>RBI Verified</h4>
+            <p>Official UPI Network</p>
+        </div>
+        <div class="indicator">
+            <div class="indicator-icon">⚡</div>
+            <h4>Instant</h4>
+            <p>Quick Confirmation</p>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.value;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const copyIcon = document.getElementById('copy-icon');
+        const copyText = document.getElementById('copy-text');
+        const originalIcon = copyIcon.textContent;
+        const originalText = copyText.textContent;
+
+        copyIcon.textContent = '✓';
+        copyText.textContent = 'Copied!';
+
+        setTimeout(() => {
+            copyIcon.textContent = originalIcon;
+            copyText.textContent = originalText;
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        showStatus('Failed to copy UPI ID', 'error');
+    });
+}
+
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submit-btn');
+    const transactionId = document.getElementById('transaction-id').value.trim();
+
+    if (!transactionId) {
+        showStatus('Please enter your transaction ID', 'error');
+        return;
+    }
+
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="spinner"></div> <span>Processing...</span>';
+
+    const formData = new FormData(this);
+
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showStatus('✓ Payment submitted successfully! The owner will verify it shortly.', 'success');
+            setTimeout(() => {
+                window.location.href = "{% url 'booking_confirmation' booking.id %}";
+            }, 2000);
+        } else {
+            showStatus('❌ ' + (data.message || 'Error verifying payment'), 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>✓</span><span>Verify Payment & Proceed</span>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showStatus('❌ An error occurred. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>✓</span><span>Verify Payment & Proceed</span>';
+    });
+});
+
+function showStatus(message, type) {
+    const statusDiv = document.getElementById('status-message');
+    statusDiv.textContent = message;
+    statusDiv.className = `status-message ${type}`;
+    statusDiv.style.display = 'block';
+
+    if (type === 'success') {
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 2000);
+    }
+}
+
+// Improve UX: auto-focus transaction ID input on page load
+window.addEventListener('load', function() {
+    document.getElementById('transaction-id').focus();
+});
+</script>
+{% endblock %}

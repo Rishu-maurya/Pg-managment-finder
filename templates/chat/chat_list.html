@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messages - PG Finder{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">💬 Messages & Chats</h4>
+                </div>
+                <div class="card-body">
+                    {% if conversations %}
+                        <div class="list-group">
+                            {% for data in conversations %}
+                                <a href="{% url 'chat_detail' data.conversation.id %}"
+                                   class="list-group-item list-group-item-action {% if data.unread_count > 0 %}active{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                {{ data.other_user.first_name }} {{ data.other_user.last_name }}
+                                                {% if data.other_user.profile_image %}
+                                                    <img src="{{ data.other_user.profile_image.url }}"
+                                                         alt="{{ data.other_user.username }}"
+                                                         class="rounded-circle"
+                                                         style="width: 30px; height: 30px; margin-left: 10px;">
+                                                {% endif %}
+                                            </h6>
+                                            {% if data.conversation.pg %}
+                                                <small class="text-muted">📍 {{ data.conversation.pg.title }}</small><br>
+                                            {% endif %}
+                                            {% if data.last_message %}
+                                                <p class="mb-1 text-muted">
+                                                    <small>{{ data.last_message.content|truncatewords:10 }}</small>
+                                                </p>
+                                            {% else %}
+                                                <p class="mb-1 text-muted"><small>No messages yet</small></p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-right">
+                                            {% if data.last_message %}
+                                                <small class="text-muted d-block">
+                                                    {{ data.last_message.created_at|date:"M d, H:i" }}
+                                                </small>
+                                            {% endif %}
+                                            {% if data.unread_count > 0 %}
+                                                <span class="badge badge-primary">{{ data.unread_count }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            <h5>No conversations yet</h5>
+                            <p>Start a conversation by visiting a PG listing and clicking "Message Owner".</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Blocked Users Section -->
+            <div class="mt-4">
+                <a href="{% url 'blocked_users' %}" class="btn btn-outline-secondary">
+                    🚫 View Blocked Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item {
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        border-left-color: #007bff;
+        background-color: #f8f9fa !important;
+    }
+
+    .list-group-item.active {
+        border-left-color: #007bff;
+        background-color: #e7f3ff !important;
+    }
+
+    .badge-primary {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+</style>
+{% endblock %}

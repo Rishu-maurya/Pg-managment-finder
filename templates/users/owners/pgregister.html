@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New PG Listing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background:#f6f8fb;">
+<div class="container py-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h4 mb-0">Create a New PG Listing</h2>
+        </div>
+        <div class="card-body">
+            <form action="{% url 'pg_register' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="id_latitude" name="latitude">
+                <input type="hidden" id="id_longitude" name="longitude">
+                <div class="mb-3">
+                    <label for="title" class="form-label"><strong>PG Title</strong></label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Cozy student PG near campus" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label"><strong>Description</strong></label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                </div>
+
+                <h5 class="mt-4">Location</h5>
+                <div class="mb-3">
+                    <label for="address" class="form-label"><strong>Full Address</strong></label>
+                    <input type="text" class="form-control" id="address" name="address" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="city" class="form-label"><strong>City</strong></label>
+                        <input type="text" class="form-control" id="city" name="city" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state" class="form-label"><strong>State</strong></label>
+                        <input type="text" class="form-control" id="state" name="state" required>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label for="pin_code" class="form-label"><strong>Pin Code</strong></label>
+                        <input type="text" class="form-control" id="pin_code" name="pin_code" required>
+                    </div>
+                </div>
+
+                <!-- Location Map -->
+                <div class="mb-4">
+                    <h5>Location Map</h5>
+                    <p class="text-muted small">Click on the map to set the exact location of your PG, or enter the address above and click "Geocode Address".</p>
+                    <div id="location-map" style="height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+                    <div class="mt-2">
+                        <button type="button" id="geocode-btn" class="btn btn-outline-primary btn-sm">🔍 Geocode Address</button>
+                        <small class="text-muted ms-2">Coordinates: <span id="coords-display">Not set</span></small>
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Pricing and setup</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="price_per_month" class="form-label"><strong>Price per Month (INR)</strong></label>
+                        <input type="number" class="form-control" id="price_per_month" name="price_per_month" step="0.01" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="security_deposit" class="form-label"><strong>Security Deposit (INR)</strong></label>
+                        <input type="number" class="form-control" id="security_deposit" name="security_deposit" step="0.01" value="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="available_from" class="form-label"><strong>Available From</strong></label>
+                        <input type="date" class="form-control" id="available_from" name="available_from" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="type_of_pg" class="form-label"><strong>PG For</strong></label>
+                        <select class="form-select" id="type_of_pg" name="type_of_pg">
+                            <option value="">Select type</option>
+                            <option value="boys">Boys</option>
+                            <option value="girls">Girls</option>
+                            <option value="coed">Co-ed</option>
+                            <option value="family">Family</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="sharing_type" class="form-label"><strong>Sharing Type</strong></label>
+                        <select class="form-select" id="sharing_type" name="sharing_type" required>
+                            <option value="single">Single</option>
+                            <option value="double">Double</option>
+                            <option value="triple">Triple</option>
+                            <option value="quad">Quad</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="furnishing_status" class="form-label"><strong>Furnishing</strong></label>
+                        <select class="form-select" id="furnishing_status" name="furnishing_status">
+                            <option value="fully_furnished">Fully Furnished</option>
+                            <option value="semi_furnished">Semi Furnished</option>
+                            <option value="unfurnished">Unfurnished</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="amenities" class="form-label"><strong>Amenities</strong></label>
+                    <input type="text" class="form-control" id="amenities" name="amenities" placeholder="Wi-Fi, AC, Geyser, Washing Machine">
+                </div>
+                <div class="mb-3">
+                    <label for="preferred_tenants" class="form-label"><strong>Preferred Tenants</strong></label>
+                    <input type="text" class="form-control" id="preferred_tenants" name="preferred_tenants" placeholder="Students, Working Professionals">
+                </div>
+                <div class="mb-3">
+                    <label for="rules_or_restrictions" class="form-label"><strong>Rules or Restrictions</strong></label>
+                    <textarea class="form-control" id="rules_or_restrictions" name="rules_or_restrictions" rows="3"></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="wifi_available" name="wifi_available" value="1">
+                        <label class="form-check-label" for="wifi_available"><strong>Wi-Fi</strong></label>
+                    </div>
+                    <div class="col-md-3 mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="food_available" name="food_available" value="1">
+                        <label class="form-check-label" for="food_available"><strong>Food</strong></label>
+                    </div>
+                    <div class="col-md-3 mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="parking_available" name="parking_available" value="1">
+                        <label class="form-check-label" for="parking_available"><strong>Parking</strong></label>
+                    </div>
+                    <div class="col-md-3 mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="is_available" name="is_available" value="1" checked>
+                        <label class="form-check-label" for="is_available"><strong>Available now</strong></label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="pg_images" class="form-label"><strong>Upload PG Images</strong></label>
+                    <input class="form-control" type="file" id="pg_images" name="pg_images" multiple>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Create Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps Script -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=marker&callback=initMap"></script>
+
+<script>
+let map;
+let marker;
+
+function initMap() {
+    // Default center (India)
+    const defaultCenter = { lat: 28.6139, lng: 77.2090 };
+
+    map = new google.maps.Map(document.getElementById('location-map'), {
+        zoom: 12,
+        center: defaultCenter,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        streetViewControl: true,
+    });
+
+    // Add click listener to set marker
+    map.addListener('click', (event) => {
+        setMarker(event.latLng);
+    });
+}
+
+function setMarker(latLng) {
+    // Remove existing marker
+    if (marker) {
+        marker.setMap(null);
+    }
+
+    // Create new marker
+    marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        draggable: true,
+        title: 'PG Location'
+    });
+
+    // Update form fields
+    document.getElementById('id_latitude').value = latLng.lat();
+    document.getElementById('id_longitude').value = latLng.lng();
+    updateCoordsDisplay(latLng.lat(), latLng.lng());
+
+    // Add drag listener
+    marker.addListener('dragend', (event) => {
+        const newPos = event.latLng;
+        document.getElementById('id_latitude').value = newPos.lat();
+        document.getElementById('id_longitude').value = newPos.lng();
+        updateCoordsDisplay(newPos.lat(), newPos.lng());
+    });
+}
+
+function updateCoordsDisplay(lat, lng) {
+    document.getElementById('coords-display').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+}
+
+// Geocode address function
+document.getElementById('geocode-btn').addEventListener('click', () => {
+    const address = document.getElementById('address').value;
+    const city = document.getElementById('city').value;
+    const state = document.getElementById('state').value;
+    const pinCode = document.getElementById('pin_code').value;
+
+    if (!address || !city) {
+        alert('Please enter at least address and city');
+        return;
+    }
+
+    const fullAddress = `${address}, ${city}, ${state} ${pinCode}`.trim();
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: fullAddress }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+            const location = results[0].geometry.location;
+            map.setCenter(location);
+            map.setZoom(16);
+            setMarker(location);
+        } else {
+            alert('Geocoding failed: ' + status);
+        }
+    });
+});
+</script>
+
+</body>
+</html>

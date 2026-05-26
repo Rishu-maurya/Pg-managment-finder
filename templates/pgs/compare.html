@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .compare-shell { max-width: 1100px; margin: 2rem auto; padding: 0 1rem 3rem; }
+  .panel { background:white; border-radius:24px; box-shadow:0 16px 42px rgba(30,31,61,0.08); padding:1.2rem; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { border-bottom:1px solid #ebeff5; padding:.9rem .7rem; text-align:left; vertical-align:top; }
+  th { width:220px; color:#546274; }
+  .cta { margin-top:1rem; display:flex; gap:.8rem; flex-wrap:wrap; }
+  .cta a { text-decoration:none; background:#eef4fb; color:#1e1f3d; padding:.8rem 1rem; border-radius:12px; font-weight:700; }
+</style>
+
+<section class="compare-shell">
+  <div class="panel">
+    <h1>Compare PGs</h1>
+    {% if compare_pgs %}
+      <table>
+        <tr><th>PG</th>{% for pg in compare_pgs %}<td><strong>{{ pg.title }}</strong></td>{% endfor %}</tr>
+        <tr><th>Location</th>{% for pg in compare_pgs %}<td>{{ pg.city }}, {{ pg.state }}</td>{% endfor %}</tr>
+        <tr><th>Price</th>{% for pg in compare_pgs %}<td>₹{{ pg.price_per_month }}/month</td>{% endfor %}</tr>
+        <tr><th>Deposit</th>{% for pg in compare_pgs %}<td>₹{{ pg.security_deposit }}</td>{% endfor %}</tr>
+        <tr><th>Sharing type</th>{% for pg in compare_pgs %}<td>{{ pg.get_sharing_type_display }}</td>{% endfor %}</tr>
+        <tr><th>Availability</th>{% for pg in compare_pgs %}<td>{% if pg.is_available %}Available from {{ pg.available_from|date:"d M Y" }}{% else %}Unavailable{% endif %}</td>{% endfor %}</tr>
+        <tr><th>Amenities</th>{% for pg in compare_pgs %}<td>{{ pg.amenities|default:"Not listed" }}</td>{% endfor %}</tr>
+        <tr><th>Rules</th>{% for pg in compare_pgs %}<td>{{ pg.rules_or_restrictions|default:"None listed" }}</td>{% endfor %}</tr>
+      </table>
+      <div class="cta">
+        {% for pg in compare_pgs %}
+          <a href="{% url 'pg_detail' pg.slug %}">Open {{ pg.title }}</a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Select up to three listings from the PG list to compare them here.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

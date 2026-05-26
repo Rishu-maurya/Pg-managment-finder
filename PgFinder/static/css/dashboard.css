@@ -1,0 +1,417 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* ---------- Add CSS variables and container constraint ---------- */
+:root {
+  --max-site-width: 1400px;
+  --gutter: clamp(16px, 3vw, 80px);
+  --navbar-height: 65px;
+  --accent: #00d4ff;
+  --accent-2: #ff4081;
+}
+
+/* constrain central content to a comfortable width */
+body.responsive {
+  display: block;
+  margin: 0 auto;
+  max-width: calc(var(--max-site-width) + (var(--gutter) * 2));
+}
+
+/* NAVBAR */
+.navbar {
+  background-color: #1e1e2f;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px var(--gutter);
+  height: var(--navbar-height);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+.logo span {
+  color: #ff4081;
+}
+
+.nav-links {
+  /* allow wrapping on narrow screens instead of overflowing */
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-size: 1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.nav-links a:hover {
+  color: #00d4ff;
+  transform: scale(1.1);
+}
+
+/* Keep buttons compact but fluid */
+.nav-links button {
+  width: auto;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.nav-links button:hover {
+  background-color: #0096b6;
+}
+
+/* SEARCH BAR */
+.search-bar {
+  padding: 8px 12px;
+  width: clamp(140px, 28vw, 320px);
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+}
+
+.search-btn {
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: none;
+  background-color: #00d4ff;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+  margin-right: clamp(8px, 2vw, 30px);
+}
+
+.search-btn:hover {
+  background-color: #0096b6;
+}
+
+
+/* FIXED FILTER BAR */
+.filter-bar.fixed {
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px var(--gutter);
+  position: sticky;
+  top: var(--navbar-height);
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.filter-wrapper h1 {
+  flex: 1;
+  font-size: 1.5rem;
+  color: #222;
+  margin: 0;
+}
+
+.filter-wrapper form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+
+.filter-toggle {
+  background-color: #00d4ff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.filter-toggle:hover {
+  background-color: #0096b6;
+}
+
+.filter-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 10;
+  min-width: min(600px, 95vw);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.filter-dropdown.active {
+  display: block;
+}
+
+.filter-row {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.filter-row label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.filter-row select {
+  padding: 8px;
+  width: 180px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.filter-row button {
+  background-color: #ff4081;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.filter-row button:hover {
+  background-color: #e73070;
+}
+
+/* SLIDER */
+.slider-section {
+  background-color: #f5f6fa;
+  overflow: hidden;
+  padding: 30px 0;
+}
+
+.slider {
+  width: 100%;
+  max-width: min(var(--max-site-width), 95%);
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.slides {
+  display: flex;
+  transition: transform 0.45s ease-in-out;
+  will-change: transform;
+}
+
+.slides img {
+  width: 100%;
+  flex: 0 0 100%;
+  height: clamp(200px, 38vh, 420px);
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Arrows */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: clamp(6px, 1.6vw, 12px);
+  font-size: clamp(16px, 2.2vw, 24px);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.3s ease;
+}
+.arrow:hover { background-color: rgba(0, 0, 0, 0.8); }
+.prev { left: 15px; }
+.next { right: 15px; }
+
+/* Dots */
+.dots {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.dot {
+  height: 10px;
+  width: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.dot.active {
+  background-color: #00d4ff;
+}
+
+
+/* Infinite loop right-to-left animation */
+@keyframes slide {
+  0% { transform: translateX(-0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* DASHBOARD CONTENT */
+.dashboard-content {
+  padding: clamp(20px, 4vw, 40px) var(--gutter);
+  background-color: #f5f6fa;
+  font-family: 'Poppins', sans-serif;
+  max-width: var(--max-site-width);
+  margin: 0 auto;
+}
+
+.dashboard-content h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* CARDS */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(16px, 2.4vw, 40px);
+}
+
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+.card img {
+  width: 100%;
+  height: clamp(160px, 28vh, 220px);
+  object-fit: cover;
+}
+.card h3 {
+  font-size: 1.2rem;
+  margin: 15px;
+  color: #222;
+}
+.card p {
+  margin: 0 15px 15px;
+  color: #666;
+}
+.card a {
+  background-color: #ff4081;
+  text-decoration: none;
+  text-align: center;
+  color: white;
+  border: none;
+  margin: 0 15px 15px;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.card button:hover {
+  background-color: #e73070;
+}
+
+/* STAR RATING */
+.rating {
+  display: flex;
+  align-items: center;
+  margin: 5px 15px 10px;
+}
+
+.rating span {
+  color: #ffbf00; /* gold star */
+  font-size: 1rem;
+  margin-right: 2px;
+}
+
+.rating .rating-number {
+  color: #666;
+  font-size: 0.9rem;
+  margin-left: 5px;
+}
+
+/* Optional: Hover effect for stars */
+.card:hover .rating span {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .navbar { padding: 12px 20px; }
+  .nav-links { gap: 12px; }
+  .search-bar { width: 100%; margin-bottom: 8px; }
+  .filter-bar.fixed { padding: 10px 20px; top: calc(var(--navbar-height)); }
+  .slides img { height: clamp(150px, 28vh, 260px); }
+  .cards-container { gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { min-height: auto; }
+}
+
+/* Very small screens: stack navigation horizontally with overflow, keep interactions accessible */
+@media (max-width: 480px) {
+  .nav-links { overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 8px; padding-bottom: 6px; }
+  .nav-links li { white-space: nowrap; }
+  .filter-dropdown { min-width: 92vw; }
+  .search-btn, .filter-toggle { padding: 8px 10px; font-size: 0.95rem; }
+}
+
+/* Make buttons and text scale a little on very large screens */
+@media (min-width: 1600px) {
+  :root { --max-site-width: 1600px; }
+  .logo { font-size: 2rem; }
+  .card h3 { font-size: 1.25rem; }
+  .dashboard-content { padding: 50px calc(2.5vw + 20px); }
+}
+
+@media (min-width: 1100px) and (max-width: 1599px) {
+  /* On typical laptop widths, show 4 cards per row */
+  .cards-container {
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    gap: clamp(12px, 2vw, 32px);
+  }
+}
+

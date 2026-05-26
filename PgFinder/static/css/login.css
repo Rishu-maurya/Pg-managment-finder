@@ -1,0 +1,247 @@
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body, html {
+    height: 100%;
+    background-color: #f5f6fa;
+    overflow-x: hidden;
+}
+
+.login-container {
+    display: flex;
+    height: 90vh;
+}
+
+
+/* NAVBAR */
+/* .navbar {
+  background-color: #1e1e2f;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 80px;
+  font-family: 'Poppins', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #00d4ff;
+}
+.logo span {
+  color: #ff4081;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+}
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-size: 1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.nav-links a:hover {
+  color: #00d4ff;
+  transform: scale(1.1);
+}
+
+.nav-links button {
+  width: 100%;
+  background-color: #00d4ff;
+  color: white;
+  padding: 10px;
+  
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.nav-links button:hover {
+  background-color: #0096b6;
+} */
+
+/* LEFT SIDE: BRANDING */
+.login-left {
+  flex: 1;
+  background: white;
+  color: rgb(0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.login-left .logo {
+  font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.login-left .tagline {
+  font-size: 1.2rem;
+  max-width: 300px;
+}
+
+/* RIGHT SIDE: LOGIN FORM */
+.login-right {
+  flex: 1;
+  background-color: white;
+  display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .login-form {
+    width: 80%;
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    background-color: #fff;
+  }
+  
+  .login-form h2 {
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+  }
+  
+  .login-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.login-form button {
+  width: 100%;
+    padding: 12px;
+    background-color: #00d4ff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #0096b6;
+}
+
+.login-form .signup-link {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.login-form .signup-link a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.alert-css{
+    background-color: rgb(224, 128, 106);
+    text-align: center;
+    
+}
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left, .login-right {
+    flex: unset;
+    width: 100%;
+    height: 50vh;
+    }
+    .login-left {
+    padding: 20px;
+    }
+    .login-right {
+    padding: 20px;
+    }
+}
+
+
+/* Verification Message Container */
+.verification-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background-color: #f5f6fa;
+  padding: 20px;
+}
+
+.verification-message {
+  background-color: white;
+  padding: 50px 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  text-align: center;
+  border-left: 5px solid #00d4ff;
+}
+
+.verification-message h2 {
+  color: #00d4ff;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.verification-message p {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.email-highlight {
+  background-color: #f0f0f0;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #1e1e2f;
+  word-break: break-all;
+}
+
+.verification-message a {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.verification-message a:hover {
+  color: #0096b6;
+}
+

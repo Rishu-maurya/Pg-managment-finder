@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block newlink %}
+<link rel="stylesheet" href="{% static 'css/pgs.css' %}">
+<style>
+  .listing-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+  .filter-panel, .compare-panel, .recent-panel { background: white; border-radius: 22px; box-shadow: 0 16px 42px rgba(30,31,61,0.08); padding: 1.2rem; margin-bottom: 1.2rem; }
+  .filter-grid { display:grid; grid-template-columns: 1.3fr repeat(7, minmax(0, 1fr)); gap:.75rem; }
+  .filter-grid input, .filter-grid select { width:100%; padding:.85rem .9rem; border:1px solid #dbe4ee; border-radius: 12px; }
+  .filter-actions { display:flex; gap:.8rem; align-items:center; margin-top:.8rem; flex-wrap:wrap; }
+  .filter-actions button, .filter-actions a { border:none; border-radius:12px; padding:.8rem 1rem; font-weight:600; text-decoration:none; }
+  .filter-actions button { background:#1e88e5; color:white; }
+  .filter-actions a { background:#eef4fb; color:#1e1f3d; }
+  .chips { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:.8rem; }
+  .chip { background:#eef4fb; color:#1e1f3d; border-radius:999px; padding:.4rem .8rem; font-size:.9rem; }
+  .results-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin:1rem 0; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; }
+  .card { background:white; border-radius:22px; overflow:hidden; box-shadow:0 14px 36px rgba(30,31,61,0.08); }
+  .cover img { width:100%; height:220px; object-fit:cover; }
+  .card-body { padding:1rem; }
+  .meta, .actions { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+  .pill { background:#eef4fb; color:#334; border-radius:999px; padding:.32rem .7rem; font-size:.82rem; }
+  .availability-yes { background:#e6f7ea; color:#1b7b34; }
+  .availability-no { background:#fde8e8; color:#b42318; }
+  .button, .button-secondary { display:inline-block; padding:.75rem 1rem; border-radius:12px; text-decoration:none; font-weight:600; }
+  .button { background:#1e88e5; color:white; }
+  .button-secondary { background:#eef4fb; color:#1e1f3d; border:none; }
+  .compare-table { width:100%; border-collapse:collapse; }
+  .compare-table th, .compare-table td { border-bottom:1px solid #ebeff5; padding:.7rem .5rem; text-align:left; vertical-align:top; }
+  .recent-links { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:.7rem; }
+  .recent-item { display:block; text-decoration:none; color:#1e1f3d; border:1px solid #e5ebf3; border-radius:14px; padding:.9rem; }
+  @media (max-width: 980px) { .filter-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .filter-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="listing-shell">
+  <form class="filter-panel" action="{% url 'search' %}" method="get">
+    <div class="filter-grid">
+      <input type="text" name="keyword" value="{{ filters.keyword }}" placeholder="Search by name, city, or amenity">
+      <select name="city">
+        <option value="">All cities</option>
+        {% for city in available_cities %}
+          <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="min_price" value="{{ filters.min_price }}" placeholder="Min price">
+      <input type="number" name="max_price" value="{{ filters.max_price }}" placeholder="Max price">
+      <select name="sharing_type">
+        <option value="">All sharing</option>
+        {% for value, label in sharing_choices %}
+          <option value="{{ value }}" {% if filters.sharing_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select name="type_of_pg">
+        <option value="">All types</option>
+        {% for value, label in type_choices %}
+          <option value="{{ value }}" {% if filters.type_of_pg == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select name="is_available">
+        <option value="">Any availability</option>
+        <option value="true" {% if filters.is_available == "true" %}selected{% endif %}>Available only</option>
+        <option value="false" {% if filters.is_available == "false" %}selected{% endif %}>Unavailable only</option>
+      </select>
+      <select name="sort">
+        {% for value, label in sort_choices %}
+          <option value="{{ value }}" {% if filters.sort == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button type="submit">Apply filters</button>
+      <a href="{% url 'search' %}">Reset filters</a>
+      <a href="{% url 'compare_pgs' %}{% if compare_ids %}?{% for compare_id in compare_ids %}compare={{ compare_id }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}">Open comparison</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'saved_pg_list' %}">Saved PGs</a>
+      {% endif %}
+    </div>
+    {% if filters.active_filters %}
+      <div class="chips">
+        {% for filter in filters.active_filters %}
+          <span class="chip">{{ filter.label }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </form>
+
+  {% if compare_pgs %}
+    <section class="compare-panel">
+      <div class="results-head">
+        <h2>Comparison shortlist</h2>
+        <a class="button-secondary" href="{% url 'compare_pgs' %}?{% for compare_pg in compare_pgs %}compare={{ compare_pg.id }}{% if not forloop.last %}&{% endif %}{% endfor %}">Detailed comparison</a>
+      </div>
+      <table class="compare-table">
+        <tr>
+          <th>PG</th>
+          {% for compare_pg in compare_pgs %}<td>{{ compare_pg.title }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <th>Price</th>
+          {% for compare_pg in compare_pgs %}<td>₹{{ compare_pg.price_per_month }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <th>Sharing</th>
+          {% for compare_pg in compare_pgs %}<td>{{ compare_pg.get_sharing_type_display }}</td>{% endfor %}
+        </tr>
+        <tr>
+          <th>Amenities</th>
+          {% for compare_pg in compare_pgs %}<td>{{ compare_pg.amenities|default:"Not listed" }}</td>{% endfor %}
+        </tr>
+      </table>
+    </section>
+  {% endif %}
+
+  {% if recent_pgs %}
+    <section class="recent-panel">
+      <div class="results-head">
+        <h2>Recently viewed</h2>
+      </div>
+      <div class="recent-links">
+        {% for recent_pg in recent_pgs %}
+          <a class="recent-item" href="{% url 'pg_detail' recent_pg.slug %}">
+            <strong>{{ recent_pg.title }}</strong><br>
+            <span>{{ recent_pg.city }}, {{ recent_pg.state }}</span><br>
+            <span>₹{{ recent_pg.price_per_month }}/month</span>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="results-head">
+    <h2>{% if search_mode %}Search results{% else %}All PG listings{% endif %}</h2>
+    <p>{{ pgs|length }} listing{{ pgs|length|pluralize }}</p>
+  </div>
+
+  {% if pgs %}
+    <div class="grid">
+      {% for pg in pgs %}
+        <article class="card">
+          <a class="cover-link" href="{% url 'pg_detail' pg.slug %}">
+            <div class="cover">
+              {% with pg.images.first as lead_image %}
+                {% if lead_image %}
+                  <img src="{{ lead_image.pg_image.url }}" alt="{{ pg.title }}">
+                {% else %}
+                  <img src="{% static 'images/user.png' %}" alt="{{ pg.title }}">
+                {% endif %}
+              {% endwith %}
+            </div>
+          </a>
+
+          <div class="card-body">
+            <div class="results-head" style="margin:0;">
+              <h3 style="margin:0;">{{ pg.title }}</h3>
+              <strong>₹{{ pg.price_per_month }}</strong>
+            </div>
+            <p>{{ pg.address }}, {{ pg.city }}, {{ pg.state }}</p>
+            <div class="meta">
+              <span class="pill">{{ pg.get_sharing_type_display }}</span>
+              {% if pg.type_of_pg %}<span class="pill">{{ pg.get_type_of_pg_display }}</span>{% endif %}
+              <span class="pill {% if pg.is_available %}availability-yes{% else %}availability-no{% endif %}">
+                {% if pg.is_available %}Available{% else %}Unavailable{% endif %}
+              </span>
+            </div>
+            <p style="margin:.8rem 0;">Available from {{ pg.available_from|date:"d M Y" }}</p>
+            <p>{{ pg.amenities|default:"Amenities will be updated soon." }}</p>
+            <div class="actions" style="margin-top:.9rem;">
+              <a class="button" href="{% url 'pg_detail' pg.slug %}">View details</a>
+              {% if user.is_authenticated %}
+                <form method="post" action="{% url 'toggle_saved_pg' pg.slug %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{% url 'search' %}?{{ request.GET.urlencode }}">
+                  <button class="button-secondary" type="submit">
+                    {% if pg.id in saved_pg_ids %}Saved{% else %}Save{% endif %}
+                  </button>
+                </form>
+              {% endif %}
+              <a class="button-secondary" href="{% url 'compare_pgs' %}?compare={{ pg.id }}{% for existing_id in compare_ids %}{% if existing_id != pg.id %}&compare={{ existing_id }}{% endif %}{% endfor %}">
+                {% if pg.id in compare_ids %}In compare{% else %}Compare{% endif %}
+              </a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="filter-panel">
+      <p>No PGs found with the selected filters. Try widening your budget, changing the city, or resetting the filters.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

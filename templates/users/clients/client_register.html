@@ -1,0 +1,12 @@
+{% extends "users/owners/register.html" %}
+{% block title %}Client Registration Form{% endblock %}
+{% block usertype %}Client{% endblock %}
+{% block form_action %}
+ <form action="{% url 'client_register' %}" id="registrationForm"  method="POST" enctype="multipart/form-data">
+{% endblock %}
+{% block aadhar %}{% endblock %}
+{% block image_upload %}
+ <label for="image" class="form-label">Profile Image </label>
+<input type="file" class="form-control" id="image" name="image" accept="image/*" onchange="previewImage(event)" >
+<div class="form-text">Upload a profile picture (optional).</div>
+{% endblock %}

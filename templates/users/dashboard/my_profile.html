@@ -1,0 +1,517 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  }
+
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #1e1f3d 0%, #2d2e4f 100%);
+    color: white;
+    padding: 25px 0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,212,255,0.3) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0,212,255,0.3);
+    border-radius: 3px;
+  }
+
+  .sidebar-header {
+    padding: 0 25px 25px 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .sidebar-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid #00d4ff;
+    object-fit: cover;
+    margin: 0 auto 18px;
+    display: block;
+    box-shadow: 0 4px 16px rgba(0,212,255,0.4);
+  }
+
+  .sidebar-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 12px 0 8px;
+    text-transform: capitalize;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .sidebar-email {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-menu li {
+    margin: 0;
+  }
+
+  .sidebar-menu a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    font-size: 15px;
+    font-weight: 500;
+    gap: 10px;
+  }
+
+  .sidebar-menu a:hover,
+  .sidebar-menu a.active {
+    background: rgba(0,212,255,0.15);
+    color: #00d4ff;
+    border-left-color: #00d4ff;
+    padding-left: 23px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: #ff9800;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .badge.confirmed {
+    background: #4caf50;
+  }
+
+  .main-content {
+    margin-left: 280px;
+    flex: 1;
+    padding: 40px;
+  }
+
+  .content-header {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 35px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-left: 5px solid #00d4ff;
+  }
+
+  .content-header h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #1e1f3d;
+    font-weight: 700;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1e1f3d;
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 4px rgba(0,212,255,0.1);
+  }
+
+  .form-group input:disabled,
+  .form-group input[readonly] {
+    background: #f8f9fa;
+    color: #999;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .btn {
+    padding: 13px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #00b8d4 0%, #007aa3 100%);
+    box-shadow: 0 6px 16px rgba(0,212,255,0.4);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: #f0f2f5;
+    color: #1e1f3d;
+    border: 2px solid #e0e0e0;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e2e5;
+    border-color: #999;
+  }
+
+  .profile-section {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+    margin-bottom: 35px;
+  }
+
+  .profile-photo {
+    text-align: center;
+  }
+
+  .profile-photo img {
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 4px solid #00d4ff;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(0,212,255,0.2);
+    display: block;
+  }
+
+  .upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .upload-btn-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .alert {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border-left: 4px solid;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-left-color: #28a745;
+  }
+
+  .alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+  }
+
+  .alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border-left-color: #17a2b8;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-container {
+      flex-direction: column;
+    }
+
+    .sidebar {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: 20px 0;
+    }
+
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+
+    .content-header {
+      padding: 20px;
+    }
+
+    .content-header h2 {
+      font-size: 24px;
+    }
+
+    .card {
+      padding: 20px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .profile-section {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .btn-group {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      {% if user_obj.profile_image %}
+        <img src="{{ user_obj.profile_image.url }}" alt="Avatar" class="sidebar-avatar">
+      {% else %}
+        <img src="{% static 'images/user.png' %}" alt="Avatar" class="sidebar-avatar">
+      {% endif %}
+      <div class="sidebar-name">{{ user_obj.first_name }} {{ user_obj.last_name }}</div>
+      <div class="sidebar-email">{{ user_obj.email }}</div>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li><a href="{% url 'my_profile' %}" class="{% if request.resolver_match.url_name == 'my_profile' %}active{% endif %}"><span>👤 My Profile</span></a></li>
+      <li><a href="{% url 'my_bookings_list' %}" class="{% if request.resolver_match.url_name == 'my_bookings_list' %}active{% endif %}">
+        <span>📚 My Bookings</span>
+        <div style="display: flex; gap: 6px;">
+          {% if pending_bookings_count %}
+            <span class="badge">⏳ {{ pending_bookings_count }}</span>
+          {% endif %}
+          {% if confirmed_bookings_count %}
+            <span class="badge confirmed">✅ {{ confirmed_bookings_count }}</span>
+          {% endif %}
+        </div>
+      </a></li>
+      <li><a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}"><span>⚙️ Settings</span></a></li>
+      <li><a href="{% url 'help_support' %}" class="{% if request.resolver_match.url_name == 'help_support' %}active{% endif %}"><span>❓ Help & Support</span></a></li>
+      <li><a href="{% url 'user_logout' %}" style="color: #ff6b6b;"><span>🚪 Logout</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="content-header">
+      <h2>👤 My Profile</h2>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="card">
+      <div class="profile-section">
+        <div class="profile-photo">
+          {% if user_obj.profile_image %}
+            <img id="profilePreview" src="{{ user_obj.profile_image.url }}" alt="Profile">
+          {% else %}
+            <img id="profilePreview" src="{% static 'images/user.png' %}" alt="Profile">
+          {% endif %}
+          <form method="post" enctype="multipart/form-data" id="photoForm" style="margin-top: 20px;">
+            {% csrf_token %}
+            <div class="upload-btn-wrapper">
+              <button type="button" class="btn btn-secondary" style="width:100%; margin-bottom:12px;">📷 Change Photo</button>
+              <input type="file" name="profile_image" id="profileImageInput" accept="image/*" onchange="previewImage(this)">
+            </div>
+            <button type="submit" form="photoForm" class="btn btn-primary" style="width:100%;">✓ Upload</button>
+          </form>
+        </div>
+
+        <div>
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" name="first_name" value="{{ user_obj.first_name }}" required>
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" name="last_name" value="{{ user_obj.last_name }}" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" value="{{ user_obj.email }}" readonly>
+              </div>
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ user_obj.phone }}" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Gender</label>
+                <select name="gender">
+                  <option value="">Select</option>
+                  <option value="male" {% if user_obj.gender == 'male' %}selected{% endif %}>Male</option>
+                  <option value="female" {% if user_obj.gender == 'female' %}selected{% endif %}>Female</option>
+                  <option value="other" {% if user_obj.gender == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" name="date_of_birth" value="{{ user_obj.date_of_birth }}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Address</label>
+              <textarea name="address" rows="3" placeholder="Enter your full address">{{ user_obj.address }}</textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" name="city" value="{{ user_obj.city }}" placeholder="Enter city">
+              </div>
+              <div class="form-group">
+                <label>State</label>
+                <input type="text" name="state" value="{{ user_obj.state }}" placeholder="Enter state">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>PIN Code</label>
+              <input type="text" name="pin_code" value="{{ user_obj.pin_code }}" placeholder="Enter PIN code">
+            </div>
+
+            <div class="btn-group">
+              <button type="submit" class="btn btn-primary">✓ Save Changes</button>
+              <a href="{% url 'home' %}" class="btn btn-secondary">✕ Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function previewImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.getElementById('profilePreview').src = evt.target.result;
+    }
+    reader.readAsDataURL(file);
+  }
+
+  document.querySelector('.upload-btn-wrapper button').addEventListener('click', function() {
+    document.getElementById('profileImageInput').click();
+  });
+</script>
+
+{% endblock %}

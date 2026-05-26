@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Map View - PG Finder{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar Filter for Map -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm sticky-top" style="top: 20px; max-height: 85vh; overflow-y: auto;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🗺️ Map Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form id="map-filter-form">
+                        <!-- Search Query -->
+                        <div class="mb-3">
+                            <label class="form-label">Search</label>
+                            <input type="text" id="map-search" class="form-control" placeholder="City, location, or PG name...">
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range (₹/month)</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" id="map-min-price" class="form-control" placeholder="Min" step="1000">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" id="map-max-price" class="form-control" placeholder="Max" step="1000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="update-map-btn" class="btn btn-primary w-100">
+                            🔄 Update Map
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    <small id="listing-count">Found {{ listings_count }} PGs</small>
+                </div>
+
+                <!-- Listing Info (shown when marker clicked) -->
+                <div id="listing-info" class="mt-3" style="display: none;">
+                    <div class="card">
+                        <img id="info-image" src="" class="card-img-top" alt="PG Image">
+                        <div class="card-body">
+                            <h6 id="info-title" class="card-title"></h6>
+                            <p id="info-address" class="card-text text-muted small"></p>
+                            <p id="info-price" class="text-primary fw-bold"></p>
+                            <a id="info-link" href="" class="btn btn-sm btn-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="col-lg-9">
+            <div id="map" style="height: 85vh; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps Script -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=marker&callback=initMap"></script>
+
+<script>
+    let map;
+    let markers = [];
+    let infoWindow;
+
+    // Initialize map
+    function initMap() {
+        // Default center (India)
+        const defaultCenter = { lat: 28.6139, lng: 77.2090 };
+
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 10,
+            center: defaultCenter,
+            mapTypeControl: true,
+            fullscreenControl: true,
+            streetViewControl: true,
+        });
+
+        infoWindow = new google.maps.InfoWindow();
+
+        // Load initial markers
+        loadMapMarkers();
+    }
+
+    // Load markers from API
+    function loadMapMarkers() {
+        const searchQuery = document.getElementById('map-search').value;
+        const minPrice = document.getElementById('map-min-price').value;
+        const maxPrice = document.getElementById('map-max-price').value;
+
+        let url = '/pgs/api/map-markers/?';
+        const params = [];
+        if (searchQuery) params.push(`q=${encodeURIComponent(searchQuery)}`);
+        if (minPrice) params.push(`min_price=${minPrice}`);
+        if (maxPrice) params.push(`max_price=${maxPrice}`);
+
+        url += params.join('&');
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                clearMarkers();
+                let bounds = new google.maps.LatLngBounds();
+
+                if (data.features.length === 0) {
+                    alert('No PGs found with these filters');
+                    return;
+                }
+
+                let pendingGeocodes = 0;
+
+                data.features.forEach(feature => {
+                    const props = feature.properties;
+                    const coords = feature.geometry.coordinates; // [lng, lat]
+
+                    // If no real coordinates, geocode the address
+                    if (!props.has_coordinates) {
+                        pendingGeocodes++;
+                        const address = `${props.address}, ${props.city}`.trim();
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ address: address }, (results, status) => {
+                            pendingGeocodes--;
+                            if (status === 'OK' && results[0]) {
+                                const location = results[0].geometry.location;
+                                createMarker(location.lat(), location.lng(), props, bounds);
+                            } else {
+                                // Use default coordinates if geocoding fails
+                                createMarker(coords[1], coords[0], props, bounds);
+                            }
+                            checkAllGeocodesComplete(bounds, data.count);
+                        });
+                    } else {
+                        createMarker(coords[1], coords[0], props, bounds);
+                    }
+                });
+
+                // If no geocoding needed, fit bounds immediately
+                if (pendingGeocodes === 0) {
+                    map.fitBounds(bounds);
+                    document.getElementById('listing-count').textContent = `Found ${data.count} PGs`;
+                }
+
+                // Helper function to create marker
+                function createMarker(lat, lng, props, bounds) {
+                    // Create marker
+                    const marker = new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map,
+                        title: props.title,
+                    });
+
+                    // Add click listener
+                    marker.addListener('click', () => {
+                        showListingInfo(props);
+                        infoWindow.setContent(`
+                            <div style="max-width: 300px;">
+                                <h6>${props.title}</h6>
+                                <p style="margin: 5px 0; font-size: 12px;">${props.price}</p>
+                                <p style="margin: 5px 0; font-size: 12px;">📍 ${props.address}</p>
+                                <a href="/pgs/${props.slug}/" class="btn btn-sm btn-primary" style="width: 100%; margin-top: 10px;">View Details</a>
+                            </div>
+                        `);
+                        infoWindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                    bounds.extend(marker.getPosition());
+                }
+
+                function checkAllGeocodesComplete(bounds, count) {
+                    if (pendingGeocodes === 0) {
+                        map.fitBounds(bounds);
+                        document.getElementById('listing-count').textContent = `Found ${count} PGs`;
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading markers:', error));
+    }
+
+    // Show listing info in sidebar
+    function showListingInfo(listing) {
+        document.getElementById('info-title').textContent = listing.title;
+        document.getElementById('info-address').textContent = `${listing.address}, ${listing.city}`;
+        document.getElementById('info-price').textContent = listing.price;
+        document.getElementById('info-image').src = listing.image_url || '{% static "images/placeholder.png" %}';
+        document.getElementById('info-link').href = `/pgs/${listing.slug}/`;
+        document.getElementById('listing-info').style.display = 'block';
+    }
+
+    // Clear all markers
+    function clearMarkers() {
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+    }
+
+    // Event listeners
+    document.getElementById('update-map-btn').addEventListener('click', loadMapMarkers);
+
+    // Allow Enter key in search
+    document.getElementById('map-search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            loadMapMarkers();
+        }
+    });
+
+    // Load markers on any input change (debounced)
+    let filterTimeout;
+    ['map-search', 'map-min-price', 'map-max-price'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(loadMapMarkers, 500);
+        });
+    });
+</script>
+
+<style>
+    #map {
+        border-radius: 8px;
+    }
+
+    .sticky-top {
+        z-index: 100;
+    }
+
+    #listing-info {
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

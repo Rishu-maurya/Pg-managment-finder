@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block newlink %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+  html, body { margin: 0; padding: 0; }
+  .hero-shell { margin: 0; padding: 2rem 1rem 3rem; background: linear-gradient(135deg, #eef7ff 0%, #f8fbff 55%, #fff8ef 100%); }
+  .hero-card { max-width: 1180px; margin: 0 auto; background: rgba(255,255,255,0.9); border-radius: 24px; padding: 2rem; box-shadow: 0 18px 50px rgba(30,31,61,0.08); }
+  .hero-grid { display: grid; grid-template-columns: 1.4fr .8fr; gap: 1.5rem; align-items: start; }
+  .hero-copy h1 { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: .8rem; color: #1e1f3d; }
+  .hero-copy p { color: #526072; font-size: 1.05rem; line-height: 1.6; max-width: 54rem; }
+  .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+  .metric { background: #1e1f3d; color: white; padding: 1rem; border-radius: 18px; }
+  .metric strong { display:block; font-size: 1.6rem; }
+  .search-panel { margin-top: 1.5rem; background: white; border: 1px solid #e5ebf3; border-radius: 20px; padding: 1rem; }
+  .search-grid { display:grid; grid-template-columns: 1.4fr repeat(5, minmax(0, 1fr)); gap: .8rem; }
+  .search-grid input, .search-grid select { width:100%; border:1px solid #d8e0ea; border-radius: 12px; padding: .85rem .9rem; }
+  .search-actions { display:flex; gap:.8rem; margin-top: .9rem; }
+  .search-actions button, .search-actions a { border-radius: 12px; padding: .85rem 1.2rem; font-weight: 600; text-decoration:none; }
+  .search-actions button { border:none; background:#1e88e5; color:white; }
+  .search-actions a { background:#eef4fb; color:#1e1f3d; }
+  .section-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+  .section-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+  .section-head h2 { margin:0; color:#1e1f3d; }
+  .section-head a { color:#1e88e5; text-decoration:none; font-weight:600; }
+  .cards-container { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
+  .pg-card { background:white; border-radius:22px; overflow:hidden; box-shadow:0 14px 36px rgba(30,31,61,0.08); }
+  .pg-card img { width:100%; height:220px; object-fit:cover; }
+  .pg-card-body { padding:1rem; }
+  .pill-row { display:flex; flex-wrap:wrap; gap:.45rem; margin:.7rem 0; }
+  .pill { background:#eef4fb; color:#335; border-radius:999px; padding:.32rem .75rem; font-size:.85rem; }
+  .pill.available { background:#e4f7e9; color:#1f7a36; }
+  .pill.unavailable { background:#fde8e8; color:#b42318; }
+  .pg-card h3 { margin:.2rem 0; color:#1e1f3d; }
+  .pg-card p { color:#5c6b7d; margin:.4rem 0; }
+  .card-link { display:inline-block; margin-top:.8rem; background:#1e88e5; color:white; text-decoration:none; padding:.75rem 1rem; border-radius:12px; font-weight:600; }
+  @media (max-width: 900px) {
+    .hero-grid, .search-grid { grid-template-columns: 1fr; }
+    .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-shell">
+  <div class="hero-card">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Find a PG you can trust, compare, and book with confidence.</h1>
+        <p>Search by city, budget, room type, and availability. Shortlist the best options, request a visit, and move to booking with a cleaner payment review flow.</p>
+
+        <form action="{% url 'search' %}" method="get" class="search-panel">
+          <div class="search-grid">
+            <input type="text" name="keyword" placeholder="Search by PG name, city, state, or amenity">
+            <select name="city">
+              <option value="">Any city</option>
+              {% for city in available_cities %}
+                <option value="{{ city }}">{{ city }}</option>
+              {% endfor %}
+            </select>
+            <input type="number" name="min_price" placeholder="Min price">
+            <input type="number" name="max_price" placeholder="Max price">
+            <select name="sharing_type">
+              <option value="">Any sharing</option>
+              {% for value, label in sharing_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+            <select name="type_of_pg">
+              <option value="">Any category</option>
+              {% for value, label in type_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="search-actions">
+            <button type="submit">Search PGs</button>
+            <a href="{% url 'pgs' %}">Browse all listings</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric"><strong>{{ metrics.total_listings }}</strong><span>Total listings</span></div>
+        <div class="metric"><strong>{{ metrics.available_listings }}</strong><span>Available now</span></div>
+        <div class="metric"><strong>{{ metrics.pending_bookings }}</strong><span>Bookings in review</span></div>
+        <div class="metric"><strong>{{ metrics.unread_messages }}</strong><span>Unread support messages</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-shell">
+  <div class="section-head">
+    <h2>Trending PGs</h2>
+    <a href="{% url 'pgs' %}">View all</a>
+  </div>
+
+  <div class="cards-container">
+    {% for pg in pg_listings %}
+      <article class="pg-card">
+        {% with pg.images.first as lead_image %}
+          {% if lead_image %}
+            <img src="{{ lead_image.pg_image.url }}" alt="{{ pg.title }}">
+          {% else %}
+            <img src="{% static 'images/user.png' %}" alt="{{ pg.title }}">
+          {% endif %}
+        {% endwith %}
+        <div class="pg-card-body">
+          <div class="pill-row">
+            <span class="pill {% if pg.is_available %}available{% else %}unavailable{% endif %}">
+              {% if pg.is_available %}Available{% else %}Unavailable{% endif %}
+            </span>
+            <span class="pill">{{ pg.get_sharing_type_display }}</span>
+            {% if pg.type_of_pg %}<span class="pill">{{ pg.get_type_of_pg_display }}</span>{% endif %}
+          </div>
+          <h3>{{ pg.title }}</h3>
+          <p>{{ pg.city }}, {{ pg.state }}</p>
+          <p>₹{{ pg.price_per_month }}/month{% if pg.security_deposit %} · Deposit ₹{{ pg.security_deposit }}{% endif %}</p>
+          <p>Available from {{ pg.available_from|date:"d M Y" }}</p>
+          <a class="card-link" href="{% url 'pg_detail' pg.slug %}">View details</a>
+        </div>
+      </article>
+    {% empty %}
+      <p>No PG listings available yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

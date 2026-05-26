@@ -1,0 +1,330 @@
+/* Reset default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Add top padding to body for fixed navbar */
+body {
+    margin: 0;
+    padding: 0;
+    padding-top: 70px;
+    overflow-x: hidden;
+}
+
+/* Navbar styling */
+.navbar {
+    background: linear-gradient(135deg, #1e1e2f 0%, #2a2b45 50%, #2d2e4f 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 40px;
+    font-family: 'Poppins', sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    min-height: 70px;
+}
+
+/* Logo section */
+.logo {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #00d4ff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    letter-spacing: -0.5px;
+}
+
+.logo:hover {
+    transform: scale(1.06);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.logo span {
+    color: #ff4081;
+    font-weight: 800;
+}
+
+/* Navigation links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #d4d4d8;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    letter-spacing: 0.3px;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.nav-links a:hover {
+    color: #00d4ff;
+    transform: translateY(-2px);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* User Profile Section */
+.user-profile {
+  list-style: none;
+  margin-left: auto;
+  position: relative;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.profile-container:hover {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.profile-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #00d4ff;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+}
+
+.profile-img:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.6);
+}
+
+.user-name {
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Profile Sidebar */
+.profile-sidebar {
+  position: absolute;
+  right: -290px;
+  top: 78px;
+  width: 290px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-sidebar.active {
+  right: 10px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.sidebar-profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #00d4ff;
+  flex-shrink: 0;
+}
+
+.sidebar-name {
+  font-weight: 700;
+  color: #1e1f3d;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.sidebar-email {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 4px 0 0 0;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.sidebar-menu li {
+  margin: 0;
+}
+
+.sidebar-menu li a {
+    color: #1e1f3d;
+    text-decoration: none;
+}
+
+.sidebar-menu a {
+  display: block;
+  padding: 12px 14px;
+  color: #1e1f3d;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sidebar-menu a:hover {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+  color: #00d4ff;
+  transform: translateX(4px);
+}
+
+.sidebar-logout {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.logout-btn {
+  display: block;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #ff4081 0%, #f50057 100%);
+  color: white !important;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 64, 129, 0.3);
+}
+
+.profile-sidebar hr {
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  margin: 12px 0;
+}
+
+/* Responsive (for mobile view) */
+@media (max-width: 768px) {
+    body {
+        padding-top: 65px;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 10px 16px;
+        gap: 12px;
+        min-height: 65px;
+    }
+
+    .logo {
+        font-size: 1.4rem;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 12px;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        white-space: nowrap;
+        width: 100%;
+        margin: 0;
+        min-width: 0;
+    }
+
+    .nav-links li {
+        flex: 0 0 auto;
+        min-width: 0;
+    }
+
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .profile-img {
+        width: 38px;
+        height: 38px;
+    }
+
+    .profile-sidebar {
+        position: fixed;
+        top: 75px;
+        right: 10px;
+        width: calc(100vw - 20px);
+        max-width: 340px;
+        left: auto;
+    }
+}

@@ -1,0 +1,152 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Book {{ pg.title }} | PG Finder{% endblock %}
+
+{% block content %}
+<style>
+.booking-form-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.form-title {
+  font-size: 32px;
+  color: #1e1f3d;
+  margin-bottom: 10px;
+}
+
+.pg-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  display: block;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.form-section {
+  margin-bottom: 30px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #1e1f3d;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #00d4ff;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(0,212,255,0.1);
+}
+
+.price-highlight {
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  margin: 30px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,212,255,0.4);
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .booking-form-container {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+}
+</style>
+
+<div class="booking-form-container">
+  <div class="form-header">
+    {% if pg.images.first %}
+      <img src="{{ pg.images.first.pg_image.url }}" alt="{{ pg.title }}" class="pg-preview">
+    {% endif %}
+    <h1 class="form-title">Book {{ pg.title }}</h1>
+    <p>Select your check-in date to proceed with booking</p>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="form-section">
+      <label class="form-label">📅 Check-in Date <span style="color: red;">*</span></label>
+      <input type="date" name="check_in_date" class="form-input" required min="{{ today }}" value="{{ today }}">
+      <small style="color: #666; font-size: 14px;">Select your preferred move-in date (must be today or future)</small>
+    </div>
+
+    <div class="price-highlight">
+      💰 ₹{{ pg.price_per_month }}/month
+      {% if pg.security_deposit %}
+        <div style="font-size: 16px; opacity: 0.9; margin-top: 5px;">
+          + ₹{{ pg.security_deposit }} security deposit (refundable)
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn-submit">
+      <i class="fas fa-credit-card"></i> Proceed to Secure Payment
+    </button>
+  </form>
+
+  <a href="{% url 'pg_detail' pg.slug %}" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Back to PG Details
+  </a>
+</div>
+{% endblock %}
+

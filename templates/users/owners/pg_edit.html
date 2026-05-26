@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section style="max-width: 900px; margin: 2.5rem auto 4rem; padding: 0 1rem;">
+  <div style="background: white; border-radius: 24px; box-shadow: 0 18px 48px rgba(30,31,61,0.08); padding: 2rem;">
+    <h1 style="margin-bottom: 1.25rem;">Edit PG Listing</h1>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:grid; gap:1rem;">
+        <label>
+          <strong>Title</strong>
+          <input type="text" name="title" value="{{ pg.title }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+        </label>
+        <label>
+          <strong>Description</strong>
+          <textarea name="description" rows="5" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">{{ pg.description }}</textarea>
+        </label>
+        <label>
+          <strong>Address</strong>
+          <input type="text" name="address" value="{{ pg.address }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+        </label>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1rem;">
+          <label>
+            <strong>City</strong>
+            <input type="text" name="city" value="{{ pg.city }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+          <label>
+            <strong>State</strong>
+            <input type="text" name="state" value="{{ pg.state }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+          <label>
+            <strong>Pin Code</strong>
+            <input type="text" name="pin_code" value="{{ pg.pin_code }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1rem;">
+          <label>
+            <strong>Price per Month</strong>
+            <input type="number" step="0.01" name="price_per_month" value="{{ pg.price_per_month }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+          <label>
+            <strong>Security Deposit</strong>
+            <input type="number" step="0.01" name="security_deposit" value="{{ pg.security_deposit }}" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+          <label>
+            <strong>Available From</strong>
+            <input type="date" name="available_from" value="{{ pg.available_from|date:'Y-m-d' }}" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+          </label>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:1rem;">
+          <label>
+            <strong>PG Type</strong>
+            <select name="type_of_pg" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+              <option value="" {% if not pg.type_of_pg %}selected{% endif %}>Select type</option>
+              <option value="boys" {% if pg.type_of_pg == 'boys' %}selected{% endif %}>Boys</option>
+              <option value="girls" {% if pg.type_of_pg == 'girls' %}selected{% endif %}>Girls</option>
+              <option value="coed" {% if pg.type_of_pg == 'coed' %}selected{% endif %}>Co-ed</option>
+              <option value="family" {% if pg.type_of_pg == 'family' %}selected{% endif %}>Family</option>
+            </select>
+          </label>
+          <label>
+            <strong>Sharing Type</strong>
+            <select name="sharing_type" required style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+              <option value="single" {% if pg.sharing_type == 'single' %}selected{% endif %}>Single</option>
+              <option value="double" {% if pg.sharing_type == 'double' %}selected{% endif %}>Double</option>
+              <option value="triple" {% if pg.sharing_type == 'triple' %}selected{% endif %}>Triple</option>
+              <option value="quad" {% if pg.sharing_type == 'quad' %}selected{% endif %}>Quad</option>
+            </select>
+          </label>
+          <label>
+            <strong>Furnishing</strong>
+            <select name="furnishing_status" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+              <option value="fully_furnished" {% if pg.furnishing_status == 'fully_furnished' %}selected{% endif %}>Fully Furnished</option>
+              <option value="semi_furnished" {% if pg.furnishing_status == 'semi_furnished' %}selected{% endif %}>Semi Furnished</option>
+              <option value="unfurnished" {% if pg.furnishing_status == 'unfurnished' %}selected{% endif %}>Unfurnished</option>
+            </select>
+          </label>
+        </div>
+        <label>
+          <strong>Amenities</strong>
+          <input type="text" name="amenities" value="{{ pg.amenities }}" placeholder="Wi-Fi, AC, Geyser" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+        </label>
+        <label>
+          <strong>Preferred Tenants</strong>
+          <input type="text" name="preferred_tenants" value="{{ pg.preferred_tenants }}" placeholder="Students, Working Professionals" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+        </label>
+        <label>
+          <strong>Rules or Restrictions</strong>
+          <textarea name="rules_or_restrictions" rows="3" style="width:100%; padding:.85rem 1rem; border:1px solid #d1d5db; border-radius:12px;">{{ pg.rules_or_restrictions }}</textarea>
+        </label>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:1rem;">
+          <label style="display:flex; align-items:center; gap:.6rem;">
+            <input type="checkbox" name="wifi_available" value="1" {% if pg.wifi_available %}checked{% endif %}>
+            <span>Wi-Fi available</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:.6rem;">
+            <input type="checkbox" name="food_available" value="1" {% if pg.food_available %}checked{% endif %}>
+            <span>Food available</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:.6rem;">
+            <input type="checkbox" name="parking_available" value="1" {% if pg.parking_available %}checked{% endif %}>
+            <span>Parking available</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:.6rem;">
+            <input type="checkbox" name="is_available" value="1" {% if pg.is_available %}checked{% endif %}>
+            <span>Listing live</span>
+          </label>
+        </div>
+        <label>
+          <strong>Upload Additional Images</strong>
+          <input type="file" name="pg_images" multiple style="width:100%; padding:.55rem 1rem; border:1px solid #d1d5db; border-radius:12px;">
+        </label>
+        <input type="hidden" name="latitude" value="{{ pg.latitude }}">
+        <input type="hidden" name="longitude" value="{{ pg.longitude }}">
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:1.25rem;">
+        <button type="submit" style="background:#102038; color:white; padding:.95rem 1.35rem; border:none; border-radius:14px; font-weight:700;">Update Listing</button>
+        <a href="{% url 'owner_dashboard' %}?pg={{ pg.slug }}" style="display:inline-flex; align-items:center; justify-content:center; padding:.95rem 1.35rem; border:1px solid #cbd5e1; border-radius:14px; color:#13243d; text-decoration:none;">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% block newlink %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+{% block content %}
+
+{% if request.GET.command == 'verification' %}
+
+<div class="verification-container">
+  <div class="verification-message">
+    <h2>✓ Verification Email Sent</h2>
+    <p>Thank you for registering with us. We have sent you a verification email to your email address:</p>
+    <p class="email-highlight">{{ request.GET.email }}</p>
+    <p>Please check your inbox and click the verification link to activate your account.</p>
+    <br>
+    <p>Already verified? <a href="{% url 'user_login' %}">Login here</a></p>
+  </div>
+</div>
+{% else %}
+<div class="login-container">
+  <!-- LEFT: BRAND -->
+  
+  <div class="login-left">
+    <div class="logo">PG<span>Finder</span></div>
+    <div class="tagline">Find the perfect hostel or PG for your stay. Comfortable, affordable, and hassle-free!</div>
+  </div>
+  
+  <!-- RIGHT: LOGIN FORM -->
+  <div class="login-right">
+    <form action="{% url 'user_login' %}" class="login-form" method="POST">
+      {% csrf_token %}
+      <h2>Login</h2>
+      <div class="alert-css">{% include "includes/alert.html" %}</div>
+      <label for="email">Email / Username</label>
+      <input name="email" id="email" placeholder="Enter your email / username" required>
+      
+        <label for="password">Password</label>
+        <input name="password" type="password" id="password" placeholder="Enter your password" required>
+        
+        <button type="submit">Login</button>
+        <div class="signup-link">
+          Don't have an account? <a href="{% url 'signup'%}">Signup</a>
+        </div>
+        
+        <div class="signup-link">
+            <a href="{% url 'forgotPassword' %}">Forget account?</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    
+    {% endblock %}

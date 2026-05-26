@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Secure Payment - {{ booking.pg.title }} | PG Finder{% endblock %}
+
+{% block content %}
+<style>
+.payment-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+.payment-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2rem;
+    text-align: center;
+}
+.payment-summary {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+.amount {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin: 0.5rem 0;
+}
+.payment-btn {
+    background: #3385ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+    transition: background 0.3s;
+}
+.payment-btn:hover {
+    background: #0066cc;
+}
+.payment-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+.security-note {
+    background: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #2e7d32;
+}
+</style>
+
+<div class="payment-container">
+    <div class="payment-card">
+        <h2>Complete Your Payment</h2>
+        <p>Secure payment for your PG booking</p>
+
+        <div class="payment-summary">
+            <h3>{{ booking.pg.title }}</h3>
+            <p>Check-in: {{ booking.check_in_date|date:"M d, Y" }}</p>
+            <div class="amount">₹{{ amount }}</div>
+            <p>One-time booking fee</p>
+        </div>
+
+        <form id="payment-form">
+            {% csrf_token %}
+            <button type="button" id="pay-btn" class="payment-btn">
+                Pay ₹{{ amount }} Securely
+            </button>
+        </form>
+
+        <div class="security-note">
+            <i class="fas fa-shield-alt"></i>
+            <strong>Secure Payment</strong><br>
+            Your payment is processed securely through Razorpay. We do not store your card details.
+        </div>
+
+        <div style="margin-top: 1rem;">
+            <a href="{% url 'booking_confirmation' booking.id %}" style="color: #666; text-decoration: none;">
+                ← Back to Booking Details
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Checkout Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('pay-btn').onclick = function(e) {
+        e.preventDefault();
+
+        var options = {
+            "key": "{{ key }}",
+            "amount": {{ amount|floatformat:0 }} * 100, // Amount in paise
+            "currency": "{{ currency }}",
+            "name": "{{ name }}",
+            "description": "{{ description }}",
+            "order_id": "{{ order_id }}",
+            "prefill": {
+                "name": "{{ prefill.name }}",
+                "email": "{{ prefill.email }}",
+                "contact": "{{ prefill.contact }}"
+            },
+            "theme": {
+                "color": "#3385ff"
+            },
+            "handler": function(response) {
+                // Handle successful payment - submit verification form
+                document.getElementById('pay-btn').disabled = true;
+                document.getElementById('pay-btn').textContent = 'Processing Payment...';
+
+                try {
+                    // Get CSRF token
+                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    // Create and submit form using fetch API for better reliability
+                    var formData = new FormData();
+                    formData.append('csrfmiddlewaretoken', csrfToken);
+                    formData.append('razorpay_payment_id', response.razorpay_payment_id);
+                    formData.append('razorpay_order_id', response.razorpay_order_id);
+                    formData.append('razorpay_signature', response.razorpay_signature);
+
+                    fetch("{% url 'razorpay_verify_payment' booking.id %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Redirect to confirmation page
+                            window.location.href = "{% url 'booking_confirmation' booking.id %}";
+                        } else {
+                            alert('Payment verification failed. Please contact support.');
+                            window.location.href = "{% url 'booking_confirmation' booking.id %}";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please contact support.');
+                        window.location.href = "{% url 'booking_confirmation' booking.id %}";
+                    });
+                } catch (error) {
+                    console.error('Error submitting payment:', error);
+                    alert('An error occurred. Please try again.');
+                    window.location.href = "{% url 'booking_confirmation' booking.id %}";
+                }
+            },
+            "modal": {
+                "ondismiss": function() {
+                    // Handle payment modal dismissal/cancellation
+                    console.log('Payment modal dismissed');
+                    window.location.href = "{% url 'booking_confirmation' booking.id %}";
+                }
+            }
+        };
+
+        try {
+            var rzp = new Razorpay(options);
+            rzp.open();
+        } catch (error) {
+            console.error('Error initializing Razorpay:', error);
+            alert('Payment gateway initialization failed. Please try again.');
+        }
+    };
+});
+</script>
+
+{% endblock %}

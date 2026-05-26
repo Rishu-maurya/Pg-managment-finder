@@ -1,0 +1,104 @@
+{% load static %}
+<nav class="navbar">
+  <a class="logo" href="{% url 'home' %}">
+    <div class="logo"> <span>PG</span>Finder</div>
+  </a>
+  <ul class="nav-links">
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'home'%}">Home</a></li>
+      <li><a href="{% url 'pgs' %}">PGs</a></li>
+      <li><a href="{% url 'about' %}">About</a></li>
+      <li><a href="{% url 'contact' %}">Contact</a></li>
+      <li><a href="{% url 'saved_pg_list' %}">Saved</a></li>
+      {% if user.is_owner or user.is_staff %}
+        <li><a href="{% url 'owner_dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'pg_register' %}">Add PG</a></li>
+        <li><a href="{% url 'owner_booking_reviews' %}">Reviews</a></li>
+      {% endif %}
+      
+      <!-- User Profile Section -->
+      <li class="user-profile">
+        <div class="profile-container" id="profileToggle">
+          {% if user.profile_image %}
+            <img src="{{ user.profile_image.url }}" alt="Profile" class="profile-img">
+          {% else %}
+            <img src="{% static 'images/user.png' %}" alt="Profile" class="profile-img">
+          {% endif %}
+          {% comment %} <span class="user-name">{{ user.first_name|default:user.username }}</span> {% endcomment %}
+        </div>
+        
+        <!-- Sidebar Dropdown -->
+        <div class="profile-sidebar" id="profileSidebar">
+          <div class="sidebar-header">
+            {% if user.profile_image %}
+              <img src="{{ user.profile_image.url }}" alt="Profile" class="sidebar-profile-img">
+            {% else %}
+              <img src="{% static 'images/user.png' %}" alt="Profile" class="sidebar-profile-img">
+            {% endif %}
+            <div>
+              <p class="sidebar-name">{{ user.first_name|default:user.username }}</p>
+              <p class="sidebar-email">{{ user.email }}</p>
+            </div>
+          </div>
+          
+          <hr>
+          
+          <ul class="sidebar-menu">
+            <li><a href="{% url 'my_profile' %}">My Profile</a></li>
+            <li>
+              <a href="{% url 'my_bookings_list' %}" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>My Bookings</span>
+              </a>
+            </li>
+            <li><a href="{% url 'saved_pg_list' %}">Saved PGs</a></li>
+            <li><a href="{% url 'settings' %}">Settings</a></li>
+            {% if user.is_owner or user.is_staff %}
+              <li><a href="{% url 'owner_dashboard' %}">Owner Dashboard</a></li>
+                <li><a href="{% url 'pg_register' %}">Add PG</a></li>
+              <li><a href="{% url 'owner_booking_reviews' %}">Owner Reviews</a></li>
+            {% endif %}
+            <li><a href="{% url 'help_support' %}">Help & Support</a></li>
+          </ul>
+          
+          <hr>
+          
+          <div class="sidebar-logout">
+            <a href="{% url 'user_logout' %}" class="logout-btn">Logout</a>
+          </div>
+        </div>
+      </li>
+    {% else %}
+      <li><a href="{% url 'about' %}">About</a></li>
+      <li><a href="{%url 'user_login'%}">Login</a></li>
+      <li><a href="{%url 'signup'%}">Signup</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<!-- JavaScript for Sidebar Toggle -->
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const profileToggle = document.getElementById('profileToggle');
+    const profileSidebar = document.getElementById('profileSidebar');
+    
+    if (profileToggle && profileSidebar) {
+      profileToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        profileSidebar.classList.toggle('active');
+      });
+      
+      // Close sidebar when clicking inside it
+      profileSidebar.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+      
+      // Close sidebar when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!profileToggle.contains(e.target) && !profileSidebar.contains(e.target)) {
+          profileSidebar.classList.remove('active');
+        }
+      });
+    }
+  });
+</script>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .payment-shell { max-width: 760px; margin: 2rem auto; padding: 0 1rem 3rem; }
+  .payment-card { background: white; border-radius: 24px; box-shadow: 0 16px 42px rgba(30,31,61,0.08); padding: 1.5rem; }
+  .summary { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:1rem; margin:1rem 0 1.4rem; }
+  .summary .item { background:#f8fbff; border:1px solid #e8eef7; border-radius:16px; padding:1rem; }
+  .summary small { display:block; color:#66768a; margin-bottom:.35rem; }
+  .field { margin-bottom: 1rem; }
+  .field input { width:100%; padding:.9rem 1rem; border:1px solid #d8e1eb; border-radius:14px; }
+  .actions { display:flex; gap:.8rem; flex-wrap:wrap; }
+  .actions button, .actions a { border:none; border-radius:12px; padding:.85rem 1rem; font-weight:700; text-decoration:none; }
+  .actions button { background:#1e88e5; color:white; }
+  .actions a { background:#eef4fb; color:#1e1f3d; }
+  @media (max-width: 760px) { .summary { grid-template-columns:1fr; } }
+</style>
+
+<section class="payment-shell">
+  <div class="payment-card">
+    <h1>Submit UPI Payment Proof (Manual Verification)</h1>
+    <p>If your automatic UPI payment verification failed or needs manual review, please share the transaction details below so the owner or admin can verify your booking.</p>
+
+    <div class="alert alert-info">
+      <strong>Note:</strong> For automatic UPI payments, your booking should be confirmed within a few minutes. This form is only needed for manual verification.
+    </div>
+
+    <div class="summary">
+      <div class="item"><small>PG</small><strong>{{ booking.pg.title }}</strong></div>
+      <div class="item"><small>Amount</small><strong>₹{{ booking.amount }}/month</strong></div>
+      <div class="item"><small>Check-in</small><strong>{{ booking.check_in_date|date:"d M Y" }}</strong></div>
+      <div class="item"><small>UPI ID</small><strong>{{ booking.phonepe_upi|default:"Not generated" }}</strong></div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="field">
+        <label for="payment_reference">UPI Transaction ID / Payment Reference</label>
+        <input id="payment_reference" type="text" name="payment_reference" value="{{ booking.payment_reference }}" placeholder="e.g., UPI1234567890" required>
+      </div>
+      <div class="field">
+        <label for="payment_screenshot">Payment Screenshot (optional)</label>
+        <input id="payment_screenshot" type="file" name="payment_screenshot" accept="image/*">
+      </div>
+      <div class="actions">
+        <button type="submit">Submit for Review</button>
+        <a href="{% url 'booking_confirmation' booking.id %}">Back to Booking</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+

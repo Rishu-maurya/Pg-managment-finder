@@ -1,0 +1,155 @@
+/* --- General Styling & Resets --- */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #343a40;
+    --light-text-color: #6c757d;
+    --border-color: #dee2e6;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.7;
+}
+
+/* --- Main Container --- */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* --- Page Header --- */
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.page-header .last-updated {
+    font-size: 0.9rem;
+    color: var(--light-text-color);
+    font-weight: 300;
+}
+
+/* --- Terms Container (Card Styling) --- */
+.terms-container {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 40px;
+    border: 1px solid var(--border-color);
+}
+
+/* --- Individual Section Styling --- */
+.term-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.term-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.term-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.term-section p, .term-section li {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-color);
+}
+
+.term-section ul {
+    list-style-position: inside;
+    padding-left: 10px;
+    margin-top: 15px;
+}
+
+.term-section ul li {
+    margin-bottom: 10px;
+}
+
+.term-section a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.term-section a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px auto;
+        padding: 15px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .terms-container {
+        padding: 25px;
+    }
+
+    .term-section h2 {
+        font-size: 1.3rem;
+    }
+
+    .term-section p, .term-section li {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 10px auto;
+        padding: 10px;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .terms-container {
+        padding: 20px;
+    }
+
+    .term-section h2 {
+        font-size: 1.2rem;
+    }
+}

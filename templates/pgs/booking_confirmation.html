@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .booking-shell { max-width: 1000px; margin: 2rem auto; padding: 0 1rem 3rem; }
+  .hero, .panel { background: white; border-radius: 24px; box-shadow: 0 16px 42px rgba(30,31,61,0.08); padding: 1.4rem; margin-bottom: 1rem; }
+  .hero { background: linear-gradient(135deg, #1e88e5 0%, #3aa0ff 100%); color: white; }
+  .timeline { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:.8rem; margin-top:1rem; }
+  .timeline-step { background: rgba(255,255,255,.12); border-radius: 16px; padding: .9rem; opacity: .65; }
+  .timeline-step.done { opacity: 1; background: rgba(255,255,255,.22); }
+  .detail-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:1rem; }
+  .tile { background:#f8fbff; border:1px solid #e7eef7; border-radius:16px; padding:1rem; }
+  .tile small { display:block; color:#66768a; margin-bottom:.35rem; }
+  .cta-row { display:flex; flex-wrap:wrap; gap:.8rem; margin-top:1rem; }
+  .cta-row a { text-decoration:none; border-radius:12px; padding:.85rem 1rem; font-weight:700; }
+  .primary { background:#1e88e5; color:white; }
+  .secondary { background:#eef4fb; color:#1e1f3d; }
+  .success-badge { background: #c8e6c9; color: #2e7d32; padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; margin-bottom: 1rem; }
+  @media (max-width: 800px) { .timeline, .detail-grid { grid-template-columns:1fr; } }
+</style>
+
+<section class="booking-shell">
+  <div class="hero">
+    <h1>Booking Confirmation</h1>
+    <p>Your booking has been created successfully. Complete the payment below to confirm your booking.</p>
+    <div class="timeline">
+      {% for step in timeline %}
+        <div class="timeline-step {% if step.done %}done{% endif %}">
+          <strong>{{ step.label }}</strong>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if request.GET.payment == "success" %}
+    <div class="panel">
+      <div class="success-badge">
+        <i class="fas fa-check-circle"></i> Payment Successful!
+      </div>
+      <h3>Your booking is now confirmed</h3>
+      <p>The owner has been notified about your booking. You should receive further instructions shortly.</p>
+    </div>
+  {% endif %}
+
+  <div class="panel detail-grid">
+    <div class="tile">
+      <small>PG</small>
+      <strong>{{ booking.pg.title }}</strong>
+    </div>
+    <div class="tile">
+      <small>Booking Status</small>
+      <strong>{{ booking.get_status_display }}</strong>
+    </div>
+    <div class="tile">
+      <small>Check-in Date</small>
+      <strong>{{ booking.check_in_date|date:"d M Y" }}</strong>
+    </div>
+    <div class="tile">
+      <small>Payment Amount</small>
+      <strong>₹{{ booking.amount }}/month</strong>
+    </div>
+    {% if booking.payment %}
+      <div class="tile">
+        <small>Payment Status</small>
+        <strong>{{ booking.payment.get_payment_status_display }}</strong>
+      </div>
+    {% endif %}
+    <div class="tile">
+      <small>Owner Contact</small>
+      <strong>{{ booking.pg.owner.phone }} · {{ booking.pg.owner.email }}</strong>
+    </div>
+  </div>
+
+  {% if booking.status == "pending" %}
+    <div class="panel">
+      <h2>Complete Your Payment</h2>
+      <p>Your booking has been created. Please complete the payment to confirm your booking.</p>
+
+      <div class="cta-row">
+        <a class="primary" href="{% url 'initiate_payment' booking.id %}">
+          <i class="fas fa-credit-card"></i> Pay Now - ₹{{ booking.amount }}
+        </a>
+      </div>
+    </div>
+  {% elif booking.status == "confirmed" %}
+    <div class="panel alert alert-success">
+      <h3><i class="fas fa-check-circle"></i> Booking Confirmed!</h3>
+      <p>Your payment has been processed successfully. Your booking is now confirmed.</p>
+      <p><strong>Check-in Date:</strong> {{ booking.check_in_date|date:"F d, Y" }}</p>
+      <p><strong>Amount Paid:</strong> ₹{{ booking.amount }}</p>
+    </div>
+  {% endif %}
+
+  <div class="panel cta-row" style="justify-content:center;">
+    <a class="secondary" href="{% url 'my_bookings_list' %}">View All Bookings</a>
+    <a class="secondary" href="{% url 'pg_detail' booking.pg.slug %}">Back to PG Details</a>
+  </div>
+
+  {% if booking.review_notes %}
+    <div class="panel">
+      <h3>Review Notes</h3>
+      <p>{{ booking.review_notes }}</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

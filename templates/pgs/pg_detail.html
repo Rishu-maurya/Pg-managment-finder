@@ -1,0 +1,758 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  }
+
+  .pg-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+
+  /* IMAGE GALLERY */
+  .gallery-section {
+    margin-bottom: 40px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .main-image {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: #f0f0f0;
+    overflow: hidden;
+  }
+
+  .main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .main-image:hover img {
+    transform: scale(1.05);
+  }
+
+  .image-counter {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .thumbnail-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 20px;
+    background: #fafafa;
+  }
+
+  .thumbnail {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 3px solid #ddd;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .thumbnail:hover,
+  .thumbnail.active {
+    border-color: #00d4ff;
+    transform: scale(1.05);
+  }
+
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* GRID LAYOUT */
+  .pg-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+
+  /* MAIN CONTENT */
+  .main-content {
+    background: white;
+    border-radius: 12px;
+    padding: 35px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .pg-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .pg-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1e1f3d;
+    margin-bottom: 12px;
+  }
+
+  .pg-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #666;
+  }
+
+  .meta-item strong {
+    color: #1e1f3d;
+  }
+
+  .price-badge {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    display: inline-block;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 35px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e1f3d;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #00d4ff;
+    width: fit-content;
+  }
+
+  .description {
+    color: #555;
+    line-height: 1.8;
+    font-size: 15px;
+  }
+
+  /* AMENITIES */
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+  }
+
+  .amenity {
+    background: linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%);
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #00d4ff;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e1f3d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .amenity:hover {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: white;
+    transform: translateY(-3px);
+  }
+
+  /* SPECS */
+  .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .spec-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #eef1f5 100%);
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .spec-card:hover {
+    border-color: #00d4ff;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,212,255,0.2);
+  }
+
+  .spec-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .spec-label {
+    font-size: 13px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .spec-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e1f3d;
+  }
+
+  /* SIDE CARD */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  }
+
+  /* OWNER CARD */
+  .owner-card {
+    text-align: center;
+  }
+
+  .owner-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid #00d4ff;
+    object-fit: cover;
+    margin: 0 auto 15px;
+    display: block;
+    box-shadow: 0 4px 16px rgba(0,212,255,0.3);
+  }
+
+  .owner-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e1f3d;
+    margin-bottom: 5px;
+  }
+
+  .owner-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 15px;
+  }
+
+  .owner-info {
+    text-align: left;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+
+  .info-item {
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .info-label {
+    color: #999;
+    display: block;
+    font-weight: 600;
+  }
+
+  .info-value {
+    color: #1e1f3d;
+    font-weight: 600;
+  }
+
+  /* ACTION BUTTONS */
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,212,255,0.4);
+  }
+
+  .btn-secondary {
+    background: #f0f2f5;
+    color: #1e1f3d;
+    border: 2px solid #e0e0e0;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e2e5;
+  }
+
+  /* MAP SECTION */
+  .map-section {
+    margin-top: 40px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .map-header {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #1e1f3d 0%, #2d2e4f 100%);
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #googleMap {
+    width: 100%;
+    height: 450px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .pg-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .pg-title {
+      font-size: 28px;
+    }
+
+    .main-image {
+      height: 300px;
+    }
+
+    .specs-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .amenities-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    #googleMap {
+      height: 300px;
+    }
+
+    .pg-meta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<div class="pg-detail-container">
+  <!-- GALLERY SECTION -->
+  <div class="gallery-section">
+    <div class="main-image">
+      {% if pg.images.exists %}
+        <img id="mainImage" src="{{ pg.images.first.pg_image.url }}" alt="{{ pg.title }}">
+      {% else %}
+        <img id="mainImage" src="{% static 'images/placeholder.png' %}" alt="No image available">
+      {% endif %}
+      {% if pg.images.count > 0 %}
+        <div class="image-counter">{{ pg.images.count }} images</div>
+      {% endif %}
+    </div>
+
+    {% if pg.images.count > 1 %}
+      <div class="thumbnail-gallery">
+        {% for image in pg.images.all %}
+          <div class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeImage(this)">
+            <img src="{{ image.pg_image.url }}" alt="Thumbnail">
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="pg-grid">
+    <div class="main-content">
+      <!-- TITLE & META -->
+      <div class="pg-header">
+        <h1 class="pg-title">{{ pg.title }}</h1>
+        <div class="pg-meta">
+          <div class="meta-item">📍 <strong>{{ pg.city }}, {{ pg.state }}</strong></div>
+          <div class="meta-item">🔑 <strong>{{ pg.get_sharing_type_display }}</strong></div>
+          <div class="meta-item">🏠 <strong>{{ pg.get_type_of_pg_display }}</strong></div>
+          <div class="price-badge">₹{{ pg.price_per_month }}/month</div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="section">
+        <h2 class="section-title">📝 Description</h2>
+        <p class="description">{{ pg.description }}</p>
+      </div>
+
+      <!-- SPECIFICATIONS -->
+      <div class="section">
+        <h2 class="section-title">✓ Specifications</h2>
+        <div class="specs-grid">
+          <div class="spec-card">
+            <div class="spec-icon">🛏️</div>
+            <div class="spec-label">Sharing Type</div>
+            <div class="spec-value">{{ pg.get_sharing_type_display }}</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon">🛋️</div>
+            <div class="spec-label">Furnishing</div>
+            <div class="spec-value">{{ pg.get_furnishing_status_display }}</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon">💰</div>
+            <div class="spec-label">Security Deposit</div>
+            <div class="spec-value">₹{{ pg.security_deposit }}</div>
+          </div>
+          <div class="spec-card">
+            <div class="spec-icon">📅</div>
+            <div class="spec-label">Available From</div>
+            <div class="spec-value">{{ pg.available_from|date:"M d, Y" }}</div>
+          </div>
+          {% if pg.food_available %}
+            <div class="spec-card">
+              <div class="spec-icon">🍽️</div>
+              <div class="spec-label">Food</div>
+              <div class="spec-value">Available</div>
+            </div>
+          {% endif %}
+          {% if pg.wifi_available %}
+            <div class="spec-card">
+              <div class="spec-icon">📡</div>
+              <div class="spec-label">WiFi</div>
+              <div class="spec-value">Available</div>
+            </div>
+          {% endif %}
+          {% if pg.parking_available %}
+            <div class="spec-card">
+              <div class="spec-icon">🚗</div>
+              <div class="spec-label">Parking</div>
+              <div class="spec-value">Available</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- AMENITIES -->
+      {% if pg.amenities_list %}
+        <div class="section">
+          <h2 class="section-title">✨ Amenities</h2>
+          <div class="amenities-grid">
+            {% for amenity in pg.amenities_list %}
+              <div class="amenity">
+                <span>✓</span> {{ amenity }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- PREFERRED TENANTS -->
+      {% if pg.preferred_tenants_list %}
+        <div class="section">
+          <h2 class="section-title">👥 Preferred Tenants</h2>
+          <div class="amenities-grid">
+            {% for tenant in pg.preferred_tenants_list %}
+              <div class="amenity">
+                <span>🎯</span> {{ tenant }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- RULES -->
+      {% if pg.rules_or_restrictions %}
+        <div class="section">
+          <h2 class="section-title">⚠️ Rules & Restrictions</h2>
+          <p class="description">{{ pg.rules_or_restrictions }}</p>
+        </div>
+      {% endif %}
+
+      <!-- CONTACT ADDRESS -->
+      <div class="section">
+        <h2 class="section-title">📮 Address</h2>
+        <p class="description">
+          {{ pg.address }}<br>
+          {{ pg.city }}, {{ pg.state }} {{ pg.pin_code }}
+        </p>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <!-- OWNER CARD -->
+      <div class="card owner-card">
+        <h3 style="margin: 0 0 15px 0; color: #1e1f3d; font-size: 18px;">🏠 Owner Details</h3>
+        {% if pg.owner.profile_image %}
+          <img class="owner-avatar" src="{{ pg.owner.profile_image.url }}" alt="{{ pg.owner.first_name }}">
+        {% else %}
+          <img class="owner-avatar" src="{% static 'images/user.png' %}" alt="Default avatar">
+        {% endif %}
+        <div class="owner-name">{{ pg.owner.first_name }} {{ pg.owner.last_name }}</div>
+        <span class="owner-tag">Property Owner</span>
+
+        <div class="owner-info">
+          <div class="info-item">
+            <span class="info-label">📧 Email</span>
+            <span class="info-value">{{ pg.owner.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">📱 Phone</span>
+            <span class="info-value">{{ pg.owner.phone }}</span>
+          </div>
+          {% if pg.owner.city %}
+            <div class="info-item">
+              <span class="info-label">📍 Location</span>
+              <span class="info-value">{{ pg.owner.city }}{% if pg.owner.state %}, {{ pg.owner.state }}{% endif %}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="action-buttons" style="margin-top: 20px;">
+          {% if user.is_authenticated %}
+            {% if user != pg.owner %}
+              <a href="{% url 'start_chat_pg' pg_slug=pg.slug %}" class="btn btn-primary">💬 Message Owner</a>
+
+            {% else %}
+              <p style="text-align: center; color: #999; font-size: 14px;">This is your listing</p>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'user_login' %}" class="btn btn-primary">💬 Login to Chat</a>
+            <a href="{% url 'user_login' %}" class="btn btn-secondary">Login to Book</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- AVAILABILITY CARD -->
+      <div class="card" style="text-align: center;">
+        <h3 style="margin: 0 0 15px 0; color: #1e1f3d;">Availability</h3>
+        {% if pg.is_available %}
+          <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; font-weight: 600;">✓ Available</div>
+        {% else %}
+          <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; font-weight: 600;">✕ Not Available</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- GOOGLE MAP SECTION -->
+  <div class="map-section">
+    <div class="map-header">📍 Location on Map</div>
+    <div id="googleMap"></div>
+  </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHo7pqR0kLhEnj45k6UKFW5q3dJK1mFZk"></script>
+<script>
+  // Gallery image switching
+  function changeImage(element) {
+    document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('mainImage').src = element.querySelector('img').src;
+  }
+
+  // Google Maps initialization
+  function initMap() {
+    const pgLat = {{ pg.latitude|default:"null" }};
+    const pgLon = {{ pg.longitude|default:"null" }};
+    const addressParts = [
+      "{{ pg.address|default:''|escapejs }}",
+      "{{ pg.city|default:''|escapejs }}",
+      "{{ pg.state|default:''|escapejs }}",
+      "{{ pg.pin_code|default:''|escapejs }}"
+    ].filter(Boolean);
+    const pgAddress = addressParts.join(', ');
+    const fallbackAddresses = [
+      pgAddress,
+      ["{{ pg.city|default:''|escapejs }}", "{{ pg.state|default:''|escapejs }}"].filter(Boolean).join(', '),
+      "{{ pg.state|default:''|escapejs }}"
+    ].filter(Boolean);
+    
+    if (pgLat !== null && pgLon !== null) {
+      // Use stored coordinates
+      const location = { lat: parseFloat(pgLat), lng: parseFloat(pgLon) };
+      const map = new google.maps.Map(document.getElementById('googleMap'), {
+        zoom: 15,
+        center: location,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        streetViewControl: true,
+      });
+
+      const marker = new google.maps.Marker({
+        position: location,
+        map: map,
+        title: "{{ pg.title|escapejs }}",
+        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div style="padding: 10px;">
+          <strong>{{ pg.title|escapejs }}</strong><br>
+          {{ pg.address|default:''|escapejs }}<br>
+          {{ pg.city|default:''|escapejs }}, {{ pg.state|default:''|escapejs }}
+        </div>`
+      });
+
+      marker.addListener('click', function() {
+        infoWindow.open(map, marker);
+      });
+
+      infoWindow.open(map, marker);
+    } else if (pgAddress) {
+      // Geocode the address with fallback queries
+      const geocoder = new google.maps.Geocoder();
+      const queries = fallbackAddresses;
+
+      const tryGeocode = function(index) {
+        if (index >= queries.length) {
+          console.log('Geocoder failed for all queries');
+          const defaultLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi
+          const map = new google.maps.Map(document.getElementById('googleMap'), {
+            zoom: 10,
+            center: defaultLocation,
+            mapTypeControl: true,
+            fullscreenControl: true,
+            streetViewControl: true,
+          });
+          new google.maps.Marker({
+            position: defaultLocation,
+            map: map,
+            title: 'Default Location - Delhi'
+          });
+          return;
+        }
+
+        geocoder.geocode({ 'address': queries[index] }, function(results, status) {
+          if (status === 'OK' && results[0]) {
+            const map = new google.maps.Map(document.getElementById('googleMap'), {
+              zoom: 15,
+              center: results[0].geometry.location,
+              mapTypeControl: true,
+              fullscreenControl: true,
+              streetViewControl: true,
+            });
+
+            const marker = new google.maps.Marker({
+              position: results[0].geometry.location,
+              map: map,
+              title: "{{ pg.title|escapejs }}",
+              icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+            });
+
+            const infoWindow = new google.maps.InfoWindow({
+              content: `<div style="padding: 10px;">
+                <strong>{{ pg.title|escapejs }}</strong><br>
+                {{ pg.address|default:''|escapejs }}<br>
+                {{ pg.city|default:''|escapejs }}, {{ pg.state|default:''|escapejs }}
+              </div>`
+            });
+
+            marker.addListener('click', function() {
+              infoWindow.open(map, marker);
+            });
+
+            infoWindow.open(map, marker);
+          } else {
+            tryGeocode(index + 1);
+          }
+        });
+      };
+
+      tryGeocode(0);
+    } else {
+      const defaultLocation = { lat: 28.6139, lng: 77.2090 }; // Delhi
+      const map = new google.maps.Map(document.getElementById('googleMap'), {
+        zoom: 10,
+        center: defaultLocation,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        streetViewControl: true,
+      });
+      new google.maps.Marker({
+        position: defaultLocation,
+        map: map,
+        title: 'Default Location - Delhi'
+      });
+    }
+  }
+
+  // Initialize map when page loads
+  window.addEventListener('load', initMap);
+</script>
+
+{% endblock %}

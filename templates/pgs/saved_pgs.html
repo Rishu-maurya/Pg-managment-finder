@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .saved-shell { max-width: 1000px; margin: 2rem auto; padding: 0 1rem 3rem; }
+  .saved-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; }
+  .saved-card { background:white; border-radius:22px; box-shadow:0 16px 42px rgba(30,31,61,0.08); overflow:hidden; }
+  .saved-card img { width:100%; height:220px; object-fit:cover; }
+  .saved-card .body { padding:1rem; }
+  .actions { display:flex; gap:.7rem; flex-wrap:wrap; margin-top:1rem; }
+  .actions a, .actions button { text-decoration:none; border:none; border-radius:12px; padding:.75rem .95rem; font-weight:700; }
+  .primary { background:#1e88e5; color:white; }
+  .secondary { background:#eef4fb; color:#1e1f3d; }
+</style>
+
+<section class="saved-shell">
+  <h1>Saved PGs</h1>
+  <p>Use this shortlist to compare options before booking.</p>
+  {% if saved_items %}
+    <div class="saved-grid">
+      {% for item in saved_items %}
+        <article class="saved-card">
+          {% with item.pg.images.first as lead_image %}
+            {% if lead_image %}
+              <img src="{{ lead_image.pg_image.url }}" alt="{{ item.pg.title }}">
+            {% endif %}
+          {% endwith %}
+          <div class="body">
+            <h3>{{ item.pg.title }}</h3>
+            <p>{{ item.pg.city }}, {{ item.pg.state }}</p>
+            <p>₹{{ item.pg.price_per_month }}/month · {{ item.pg.get_sharing_type_display }}</p>
+            <div class="actions">
+              <a class="primary" href="{% url 'pg_detail' item.pg.slug %}">View details</a>
+              <a class="secondary" href="{% url 'compare_pgs' %}?compare={{ item.pg.id }}">Compare</a>
+              <form method="post" action="{% url 'toggle_saved_pg' item.pg.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'saved_pg_list' %}">
+                <button class="secondary" type="submit">Remove</button>
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>You have not saved any PGs yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
